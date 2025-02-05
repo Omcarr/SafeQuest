@@ -20,8 +20,20 @@ const ProfilePage = ({navigation}) => {
   };
 
   const familyMembers = [
-    {id: '1', name: 'Jane Doe', age: 28, sex: 'Female'},
-    {id: '2', name: 'Sam Doe', age: 5, sex: 'Male'},
+    {
+      id: '1',
+      name: 'Jane Doe',
+      age: 28,
+      sex: 'Female',
+      image: 'https://cdn-icons-png.flaticon.com/256/8326/8326711.png',
+    },
+    {
+      id: '2',
+      name: 'Sam Doe',
+      age: 5,
+      sex: 'Male',
+      image: 'https://cdn-icons-png.flaticon.com/256/4825/4825112.png',
+    },
   ];
 
   const [savedPlaces, setSavedPlaces] = useState([
@@ -101,10 +113,19 @@ const ProfilePage = ({navigation}) => {
         data={familyMembers}
         keyExtractor={item => item.id}
         renderItem={({item}) => (
-          <View style={styles.familyMember}>
-            <Text>
-              {item.name}, {item.age}, {item.sex}
-            </Text>
+          <View style={styles.familyMemberContainer}>
+            <Image
+              source={{
+                uri: item.image,
+              }}
+              style={styles.familyMemberAvatar}
+            />
+            <View style={styles.familyMemberDetails}>
+              <Text style={styles.familyMemberName}>{item.name}</Text>
+              <Text style={styles.familyMemberInfo}>
+                {item.age} | {item.sex}
+              </Text>
+            </View>
           </View>
         )}
       />
@@ -177,15 +198,18 @@ const ProfilePage = ({navigation}) => {
               onChangeText={text => setNewPlace({...newPlace, long: text})}
             />
             <View style={styles.modalButtonContainer}>
-              <Button
-                title={editingPlace ? 'Save' : 'Add'}
-                onPress={savePlace}
-              />
-              <Button
-                title="Cancel"
-                onPress={() => setModalVisible(false)}
-                color="red"
-              />
+              <TouchableOpacity
+                style={[styles.roundedButton, , styles.cancelButton]}
+                onPress={() => setModalVisible(false)}>
+                <Text style={[styles.roundedButtonText]}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.roundedButton, styles.saveButton]}
+                onPress={savePlace}>
+                <Text style={styles.roundedButtonText}>
+                  {editingPlace ? 'Save' : 'Add'}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -193,15 +217,22 @@ const ProfilePage = ({navigation}) => {
 
       {/* Buttons Section */}
       <View style={styles.buttonContainer}>
-        <Button
-          title="Settings"
-          onPress={() => navigation.navigate('Settings')}
-        />
-        <Button
-          title="Log Out"
-          onPress={() => console.log('Logging out...')}
-          color="red"
-        />
+        <TouchableOpacity onPress={() => console.log('Logging out...')}>
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/660/660350.png',
+            }}
+            style={styles.logoutButton}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+          <Image
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/9333/9333993.png',
+            }}
+            style={styles.settingsButton}
+          />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -229,12 +260,35 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  addButton: {fontSize: 24, fontWeight: 'bold', color: 'blue'},
-  familyMember: {
-    padding: 10,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 8,
+  addButton: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: 'blue',
+    paddingRight: 10,
+  },
+  familyMemberContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 10,
+    paddingVertical: 10,
+  },
+  familyMemberAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 15,
+  },
+  familyMemberDetails: {
+    flexDirection: 'column',
+  },
+  familyMemberName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  familyMemberInfo: {
+    fontSize: 14,
+    color: '#666',
   },
   placeItem: {
     flexDirection: 'row',
@@ -245,7 +299,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: '#f0f0f0',
   },
-  iconContainer: {flexDirection: 'row', alignItems: 'center', gap: 10},
+  iconContainer: {flexDirection: 'row', alignItems: 'center', gap: 15},
   editButton: {color: 'blue'},
   deleteButton: {color: 'red'},
   modalContainer: {
@@ -263,6 +317,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalButtonContainer: {
+    paddingTop: 6,
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
@@ -285,11 +340,38 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 20,
+    marginHorizontal: 6,
+    marginBottom: 5,
   },
   editButton: {
     width: 20,
     height: 20,
     // Add any additional styling as needed
+  },
+  roundedButton: {
+    borderRadius: 25,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveButton: {
+    backgroundColor: '#007bff', // Blue color for save/add
+  },
+  cancelButton: {
+    backgroundColor: '#cc0000', // Blue color for save/add
+  },
+  roundedButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  settingsButton: {
+    width: 30,
+    height: 30,
+  },
+  logoutButton: {
+    width: 30,
+    height: 30,
   },
 });
 
