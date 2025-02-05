@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  PermissionsAndroid,
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import DropDownPicker from 'react-native-dropdown-picker';
@@ -38,15 +39,37 @@ const LoginSignup = () => {
   ]);
 
   const navigation = useNavigation();
-  const scrollViewRef = useRef(null);
 
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
   };
 
+  // Request Permission for Android Media Picker
+  const requestPermission = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return true;
+  };
+
   // Handle Profile Picture Upload
-  const handleImageUpload = () => {
-    launchImageLibrary({ mediaType: 'photo' }, (response) => {
+  const handleImageUpload = async () => {
+    const hasPermission = await requestPermission();
+    if (!hasPermission) {
+      alert('Permission Denied: Cannot Access Media');
+      return;
+    }
+
+    const options = {
+      mediaType: 'photo',
+      maxWidth: 300,
+      maxHeight: 300,
+      quality: 1,
+    };
+
+    launchImageLibrary(options, (response) => {
+      if (response.didCancel) return;
       if (response.assets && response.assets.length > 0) {
         setFormData({ ...formData, profilePic: response.assets[0].uri });
       }
@@ -77,18 +100,18 @@ const LoginSignup = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContainer} ref={scrollViewRef}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        
         {/* Profile Picture */}
-        {!isLogin && (
-          <TouchableOpacity onPress={handleImageUpload} style={styles.profileContainer}>
-            <Image source={{ uri: formData.profilePic }} style={styles.profileImage} />
-            <Text style={styles.uploadText}>Upload Profile Picture</Text>
-          </TouchableOpacity>
-        )}
+        <View style={styles.profileContainer}>
+          <Image source={{ uri: formData.profilePic }} style={styles.profileImage} />
+          {!isLogin && (
+            <TouchableOpacity onPress={handleImageUpload} style={styles.uploadButton}>
+              <Text style={styles.uploadText}>Upload Profile Picture</Text>
+            </TouchableOpacity>
+          )}
+        </View>
 
         {/* Tab Switcher */}
         <View style={styles.tabContainer}>
@@ -103,63 +126,24 @@ const LoginSignup = () => {
         {/* Form Fields */}
         {isLogin ? (
           <>
-            <TextInput
-              label="Enter your email"
-              mode="outlined"
-              theme={{ colors: { primary: '#0056b3' } }}
-              style={styles.input}
-              keyboardType="email-address"
-              value={formData.email}
-              onChangeText={(text) => handleInputChange('email', text)}
-            />
-            <TextInput
-              label="Enter your password"
-              mode="outlined"
-              theme={{ colors: { primary: '#0056b3' } }}
-              style={styles.input}
-              secureTextEntry={!showPassword}
-              right={
-                <TextInput.Icon
-                  icon={() => (
-                    <Image
-                      source={{
-                        uri: showPassword
-                          ? 'https://cdn-icons-png.flaticon.com/128/9726/9726597.png'
-                          : 'https://cdn-icons-png.flaticon.com/128/11502/11502541.png',
-                      }}
-                      style={styles.eyeIcon}
-                    />
-                  )}
-                  onPress={() => setShowPassword(!showPassword)}
-                  forceTextInputFocus={false} // Prevent keyboard from opening
-                />
-              }
-              value={formData.password}
-              onChangeText={(text) => handleInputChange('password', text)}
-            />
+            <TextInput label="Enter your email" mode="outlined" style={styles.input} keyboardType="email-address" value={formData.email} onChangeText={(text) => handleInputChange('email', text)} />
+            <TextInput label="Enter your password" mode="outlined" style={styles.input} secureTextEntry={!showPassword} right={<TextInput.Icon icon={() => <Image source={{ uri: showPassword ? 'https://cdn-icons-png.flaticon.com/128/9726/9726597.png' : 'https://cdn-icons-png.flaticon.com/128/11502/11502541.png' }} style={styles.eyeIcon} />} onPress={() => setShowPassword(!showPassword)} forceTextInputFocus={false} />} value={formData.password} onChangeText={(text) => handleInputChange('password', text)} />
           </>
         ) : (
           <>
-            <TextInput label="Full Name" mode="outlined" theme={{ colors: { primary: '#0056b3' } }} style={styles.input} value={formData.name} onChangeText={(text) => handleInputChange('name', text)} />
-            <TextInput label="Age" mode="outlined" theme={{ colors: { primary: '#0056b3' } }} style={styles.input} keyboardType="numeric" value={formData.age} onChangeText={(text) => handleInputChange('age', text)} />
+            <TextInput label="Full Name" mode="outlined" style={styles.input} value={formData.name} onChangeText={(text) => handleInputChange('name', text)} />
+            <TextInput label="Age" mode="outlined" style={styles.input} keyboardType="numeric" value={formData.age} onChangeText={(text) => handleInputChange('age', text)} />
 
             {/* Gender Dropdown */}
-            <DropDownPicker
-              open={open}
-              value={gender}
-              items={items}
-              setOpen={setOpen}
-              setValue={setGender}
-              setItems={setItems}
-              containerStyle={styles.pickerContainer}
-              style={styles.picker}
-              dropDownContainerStyle={styles.pickerDropdown}
-              onChangeValue={(value) => handleInputChange('sex', value)}
-            />
+            <View style={styles.genderContainer}>
+              <Text style={styles.label}>Select Gender</Text>
+              <DropDownPicker open={open} value={gender} items={items} setOpen={setOpen} setValue={setGender} setItems={setItems} containerStyle={styles.pickerContainer} style={styles.picker} dropDownContainerStyle={styles.pickerDropdown} onChangeValue={(value) => handleInputChange('sex', value)} />
+            </View>
 
-            <TextInput label="Email Address" mode="outlined" theme={{ colors: { primary: '#0056b3' } }} style={styles.input} keyboardType="email-address" value={formData.email} onChangeText={(text) => handleInputChange('email', text)} />
-            <TextInput label="Create Password" mode="outlined" theme={{ colors: { primary: '#0056b3' } }} style={styles.input} secureTextEntry={!showPassword} right={<TextInput.Icon icon={() => <Image source={{ uri: showPassword ? 'https://cdn-icons-png.flaticon.com/128/9726/9726597.png' : 'https://cdn-icons-png.flaticon.com/128/11502/11502541.png' }} style={styles.eyeIcon} />} onPress={() => setShowPassword(!showPassword)} forceTextInputFocus={false} />} value={formData.password} onChangeText={(text) => handleInputChange('password', text)} />
-            <TextInput label="Confirm Password" mode="outlined" theme={{ colors: { primary: '#0056b3' } }} style={styles.input} secureTextEntry={!showConfirmPassword} right={<TextInput.Icon icon={() => <Image source={{ uri: showConfirmPassword ? 'https://cdn-icons-png.flaticon.com/128/9726/9726597.png' : 'https://cdn-icons-png.flaticon.com/128/11502/11502541.png' }} style={styles.eyeIcon} />} onPress={() => setShowConfirmPassword(!showConfirmPassword)} forceTextInputFocus={false} />} value={formData.confirmPassword} onChangeText={(text) => handleInputChange('confirmPassword', text)} />
+            <TextInput label="Email Address" mode="outlined" style={styles.input} keyboardType="email-address" value={formData.email} onChangeText={(text) => handleInputChange('email', text)} />
+            <TextInput label="Enter your address" mode="outlined" style={styles.input} value={formData.address} onChangeText={(text) => handleInputChange('address', text)} />
+            <TextInput label="Create Password" mode="outlined" style={styles.input} secureTextEntry={!showPassword} right={<TextInput.Icon icon={() => <Image source={{ uri: showPassword ? 'https://cdn-icons-png.flaticon.com/128/9726/9726597.png' : 'https://cdn-icons-png.flaticon.com/128/11502/11502541.png' }} style={styles.eyeIcon} />} onPress={() => setShowPassword(!showPassword)} forceTextInputFocus={false} />} value={formData.password} onChangeText={(text) => handleInputChange('password', text)} />
+            <TextInput label="Confirm Password" mode="outlined" style={styles.input} secureTextEntry={!showConfirmPassword} right={<TextInput.Icon icon={() => <Image source={{ uri: showConfirmPassword ? 'https://cdn-icons-png.flaticon.com/128/9726/9726597.png' : 'https://cdn-icons-png.flaticon.com/128/11502/11502541.png' }} style={styles.eyeIcon} />} onPress={() => setShowConfirmPassword(!showConfirmPassword)} forceTextInputFocus={false} />} value={formData.confirmPassword} onChangeText={(text) => handleInputChange('confirmPassword', text)} />
           </>
         )}
 
@@ -167,6 +151,7 @@ const LoginSignup = () => {
         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
           <Text style={styles.buttonText}>{isLogin ? 'Login' : 'Sign Up'}</Text>
         </TouchableOpacity>
+
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -195,16 +180,17 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#0056b3',
   },
-  defaultProfileIcon: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    tintColor: '#0056b3',
+  uploadButton: {
+    marginTop: 8,
+    backgroundColor: '#007BFF',
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 8,
   },
   uploadText: {
-    marginTop: 5,
-    color: '#0056b3',
+    color: '#FFF',
     fontSize: 14,
+    fontWeight: 'bold',
   },
   tabContainer: {
     flexDirection: 'row',
@@ -235,7 +221,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   button: {
-    marginTop: 10,
+    marginTop: 15,
     width: '100%',
     backgroundColor: '#0056b3',
     padding: 12,
@@ -246,6 +232,16 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  genderContainer: {
+    width: '100%',
+    marginBottom: 12,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#333',
   },
   pickerContainer: {
     width: '100%',
@@ -263,8 +259,8 @@ const styles = StyleSheet.create({
     borderColor: '#DDD',
   },
   eyeIcon: {
-    width: 20,
-    height: 20,
+    width: 24,
+    height: 24,
     tintColor: '#555',
   },
 });
