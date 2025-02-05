@@ -1,9 +1,8 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { Image, View, Text } from 'react-native';
 import Home from './pages/Home';
 import Tutorial from './Tutorial';
-import { View, Text } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
@@ -16,13 +15,18 @@ const SettingsScreen = () => (
 
 // Dummy Profile Screen
 const ProfileScreen = ({ route }) => {
-  const userName = route?.params?.name || "Your"; // Default to "Your" if no name is passed
+  const userName = route?.params?.name || "Your";
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text style={{ fontSize: 20, fontWeight: 'bold' }}>This is {userName}'s Profile</Text>
     </View>
   );
 };
+
+// Function to render tab bar icons from URLs
+const getTabIcon = (iconUrl, size) => (
+  <Image source={{ uri: iconUrl }} style={{ width: size, height: size }} resizeMode="contain" />
+);
 
 const Navbar = () => {
   return (
@@ -43,13 +47,14 @@ const Navbar = () => {
         tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
         tabBarActiveTintColor: '#007BFF',
         tabBarInactiveTintColor: '#666',
-        tabBarIcon: ({ color, size }) => {
-          let iconName;
-          if (route.name === 'Home') iconName = 'home';
-          else if (route.name === 'Tutorials') iconName = 'school';
-          else if (route.name === 'My Profile') iconName = 'person';
-          else if (route.name === 'Settings') iconName = 'settings';
-          return <MaterialIcons name={iconName} size={size} color={color} />;
+        tabBarIcon: ({ focused }) => {
+          let iconUrl;
+          if (route.name === 'Home') iconUrl = 'https://cdn-icons-png.flaticon.com/128/263/263115.png';
+          else if (route.name === 'Tutorials') iconUrl = 'https://cdn-icons-png.flaticon.com/128/1258/1258409.png';
+          else if (route.name === 'My Profile') iconUrl = 'https://cdn-icons-png.flaticon.com/128/1077/1077063.png';
+          else if (route.name === 'Settings') iconUrl = 'https://cdn-icons-png.flaticon.com/128/839/839599.png';
+
+          return getTabIcon(iconUrl, focused ? 28 : 24);
         },
       })}
     >
