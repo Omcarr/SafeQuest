@@ -10,11 +10,12 @@ const ProfileHead = () => {
       <View style={styles.header}>
         <Text style={styles.helloText}>Hello Mihit</Text>
         <TouchableOpacity onPress={() => navigation.navigate('My Profile')}>
-          <Image
-            source={{ uri: 'https://cdn-icons-png.flaticon.com/128/2202/2202112.png' }}
-            style={styles.profileIcon}
-          />
-        </TouchableOpacity>
+        <Image
+          source={{ uri: 'https://cdn-icons-png.flaticon.com/128/2202/2202112.png' }}
+          style={styles.profileIcon}
+        />
+      </TouchableOpacity>
+
       </View>
     </SafeAreaView>
   );

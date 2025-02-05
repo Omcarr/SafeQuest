@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginSignup from './pages/LoginSignup';
 import Navbar from './Navbar'; // Updated to use Navbar
+import ProfilePage from './pages/ProfilePage';
 
 const Stack = createNativeStackNavigator();
 
@@ -15,6 +16,7 @@ const App = () => {
 
         {/* After login/signup, navigate to MainApp (which contains the navbar tabs) */}
         <Stack.Screen name="MainApp" component={Navbar} />
+        <Stack.Screen name="My Profile" component={ProfilePage} />
       </Stack.Navigator>
     </NavigationContainer>
   );
