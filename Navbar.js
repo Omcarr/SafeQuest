@@ -1,31 +1,34 @@
 import React from 'react';
+import { View, Image, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Image, View, Text } from 'react-native';
-import Home from './pages/Home';
-import Tutorial from './pages/Tutorial';
+import NavigationPage from './pages/NavigationPage';
+import FamilyPage from './pages/FamilyPage';
+import HistoryPage from './pages/HistoryPage';
+import CommunityPage from './pages/CommunityPage';
+import ProfileHead from './pages/ProfileHead'; // Import the profile header
 
 const Tab = createBottomTabNavigator();
 
-// Dummy Settings Screen
-const SettingsScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <Text>Settings Screen (Coming Soon)</Text>
-  </View>
-);
-
-// Dummy Profile Screen
-const ProfileScreen = ({ route }) => {
-  const userName = route?.params?.name || "Your";
+// Function to wrap each screen with ProfileHead
+const ScreenWrapper = ({ children }) => {
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text style={{ fontSize: 20, fontWeight: 'bold' }}>This is {userName}'s Profile</Text>
+    <View style={{ flex: 1 }}>
+      <ProfileHead /> {/* Adds the "Hello Mihit" and Profile Icon at the top */}
+      {children}
     </View>
   );
 };
 
 // Function to render tab bar icons from URLs
-const getTabIcon = (iconUrl, size) => (
-  <Image source={{ uri: iconUrl }} style={{ width: size, height: size }} resizeMode="contain" />
+const getTabIcon = (iconUrl, size, isThicker = false) => (
+  <Image
+    source={{ uri: iconUrl }}
+    style={{
+      width: isThicker ? size + 4 : size, // Increase size slightly
+      height: isThicker ? size + 4 : size,
+      resizeMode: 'contain',
+    }}
+  />
 );
 
 const Navbar = () => {
@@ -33,37 +36,57 @@ const Navbar = () => {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: '#fff',
-          height: 60,
-          borderTopLeftRadius: 15,
-          borderTopRightRadius: 15,
-          elevation: 5, // Shadow effect
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-        },
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
+        tabBarStyle: styles.tabBar,
+        tabBarLabelStyle: styles.tabLabel,
         tabBarActiveTintColor: '#007BFF',
         tabBarInactiveTintColor: '#666',
+
         tabBarIcon: ({ focused }) => {
           let iconUrl;
-          if (route.name === 'Home') iconUrl = 'https://cdn-icons-png.flaticon.com/128/263/263115.png';
-          else if (route.name === 'Tutorials') iconUrl = 'https://cdn-icons-png.flaticon.com/128/1258/1258409.png';
-          else if (route.name === 'My Profile') iconUrl = 'https://cdn-icons-png.flaticon.com/128/1077/1077063.png';
-          else if (route.name === 'Settings') iconUrl = 'https://cdn-icons-png.flaticon.com/128/839/839599.png';
-
-          return getTabIcon(iconUrl, focused ? 28 : 24);
+          let isThicker = false; // Default: No extra thickness
+        
+          if (route.name === 'Navigation') {
+            iconUrl = 'https://cdn-icons-png.flaticon.com/128/592/592245.png';
+          } else if (route.name === 'Family') {
+            iconUrl = 'https://cdn-icons-png.flaticon.com/128/1416/1416832.png';
+            isThicker = true; // Slightly thicker Family icon
+          } else if (route.name === 'History') {
+            iconUrl = 'https://cdn-icons-png.flaticon.com/128/3503/3503786.png';
+          } else if (route.name === 'Community') {
+            iconUrl = 'https://cdn-icons-png.flaticon.com/128/2956/2956777.png';
+            isThicker = true; // Slightly thicker Community icon
+          } else if (route.name === 'Profile') {
+            iconUrl = 'https://cdn-icons-png.flaticon.com/128/1077/1077063.png';
+          }
+        
+          return getTabIcon(iconUrl, focused ? 28 : 24, isThicker);
         },
       })}
     >
-      <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen name="Tutorials" component={Tutorial} />
-      <Tab.Screen name="My Profile" component={ProfileScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen name="Navigation" children={() => <ScreenWrapper><NavigationPage /></ScreenWrapper>} />
+      <Tab.Screen name="Family" children={() => <ScreenWrapper><FamilyPage /></ScreenWrapper>} />
+      <Tab.Screen name="History" children={() => <ScreenWrapper><HistoryPage /></ScreenWrapper>} />
+      <Tab.Screen name="Community" children={() => <ScreenWrapper><CommunityPage /></ScreenWrapper>} />
     </Tab.Navigator>
   );
 };
 
 export default Navbar;
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: '#fff',
+    height: 60,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    elevation: 5, // Shadow effect
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  tabLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+});
