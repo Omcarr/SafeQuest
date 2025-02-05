@@ -12,7 +12,7 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {/* First screen: Login / Signup */}
-        <Stack.Screen name="LoginSignup" component={LoginSignup} />
+        {/* <Stack.Screen name="LoginSignup" component={LoginSignup} /> */}
 
         {/* After login/signup, navigate to MainApp (which contains the navbar tabs) */}
         <Stack.Screen name="MainApp" component={Navbar} />
