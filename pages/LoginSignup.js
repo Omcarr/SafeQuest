@@ -95,10 +95,10 @@ const LoginSignup = () => {
 
   const handleSubmit = () => {
     if (validateInputs()) {
-      navigation.replace('Home');
+      navigation.replace('MainApp'); // Redirect to the main app (Navbar.js)
     }
   };
-
+  
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
