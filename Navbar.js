@@ -1,13 +1,17 @@
 import React from 'react';
 import {View, Image, StyleSheet} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import NavigationPage from './pages/NavigationPage';
 import FamilyPage from './pages/FamilyPage';
 import TripHistory from './pages/TripHistory';
 import CommunityPage from './pages/CommunityPage';
 import ProfileHead from './pages/ProfileHead'; // Import the profile header
+import CreateFamily from './pages/CreateFamily';
+import JoinFamily from './pages/JoinFamily';
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 // Function to wrap each screen with ProfileHead
 const ScreenWrapper = ({children}) => {
@@ -30,6 +34,16 @@ const getTabIcon = (iconUrl, size, isThicker = false) => (
     }}
   />
 );
+
+const FamilyStack = () => {
+  return (
+    <Stack.Navigator screenOptions={{headerShown: false}}>
+      <Stack.Screen name="FamilyPage" component={FamilyPage} />
+      <Stack.Screen name="CreateFamily" component={CreateFamily} />
+      <Stack.Screen name="JoinFamily" component={JoinFamily} />
+    </Stack.Navigator>
+  );
+};
 
 const Navbar = () => {
   return (
@@ -74,7 +88,7 @@ const Navbar = () => {
         name="Family"
         children={() => (
           <ScreenWrapper>
-            <FamilyPage />
+            <FamilyStack />
           </ScreenWrapper>
         )}
       />
