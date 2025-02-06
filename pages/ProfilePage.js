@@ -227,9 +227,7 @@ const ProfilePage = ({navigation}) => {
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
           <Image
-            source={{
-              uri: 'https://cdn-icons-png.flaticon.com/128/9333/9333993.png',
-            }}
+            source={{ uri: 'https://cdn-icons-png.flaticon.com/128/9333/9333993.png' }}
             style={styles.settingsButton}
           />
         </TouchableOpacity>

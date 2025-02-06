@@ -6,6 +6,10 @@ import LoginSignup from './pages/LoginSignup';
 import Navbar from './Navbar'; // Updated to use Navbar
 import ProfilePage from './pages/ProfilePage';
 import Intro from './Intro'; // Importing the animated intro screen
+import Settings from './pages/Settings';
+import TermsPrivacy from './pages/settings/TermsPrivacy';
+import AboutSafeQuest from './pages/settings/AboutSafeQuest';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +28,10 @@ const App = () => {
             {/* <Stack.Screen name="LoginSignup" component={LoginSignup} /> */}
             <Stack.Screen name="MainApp" component={Navbar} />
             <Stack.Screen name="My Profile" component={ProfilePage} />
+            <Stack.Screen name="Settings" component={Settings} /> 
+            <Stack.Screen name="TermsPrivacy" component={TermsPrivacy} />
+            <Stack.Screen name="AboutSafeQuest" component={AboutSafeQuest} />
+
           </Stack.Navigator>
         </NavigationContainer>
       )}
