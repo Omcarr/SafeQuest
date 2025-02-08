@@ -6,13 +6,15 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
+import {WebView} from 'react-native-webview';
 import {useUser} from '../userContext';
 
 const MAPBOX_API_KEY =
   'pk.eyJ1Ijoid2ViLWNvZGVncmFtbWVyIiwiYSI6ImNraHB2dXJvajFldTAzMm14Y2lveTB3a3cifQ.LfZtv0p9GUZCP7ZVuT33ow';
 
-const LocationAutocomplete = () => {
+const NavigationPage = () => {
   const {userData} = useUser();
   const user = userData;
   const [source, setSource] = useState('');
@@ -37,9 +39,6 @@ const LocationAutocomplete = () => {
   };
 
   const fetchLatLong = async location => {
-    const MAPBOX_API_KEY =
-      'pk.eyJ1Ijoid2ViLWNvZGVncmFtbWVyIiwiYSI6ImNraHB2dXJvajFldTAzMm14Y2lveTB3a3cifQ.LfZtv0p9GUZCP7ZVuT33ow'; // Apna API key daal
-
     const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
       location,
     )}.json?access_token=${MAPBOX_API_KEY}&limit=1`;
@@ -49,7 +48,7 @@ const LocationAutocomplete = () => {
       const data = await response.json();
 
       if (data.features && data.features.length > 0) {
-        const coordinates = data.features[0].geometry.coordinates; // [longitude, latitude]
+        const coordinates = data.features[0].geometry.coordinates;
         return {latitude: coordinates[1], longitude: coordinates[0]};
       } else {
         throw new Error('Location not found');
@@ -60,50 +59,33 @@ const LocationAutocomplete = () => {
     }
   };
 
-  const fetchSafestRoute = async () => {
-    console.log('aaya');
-    const body = JSON.stringify({
-      latA: 37.7749,
-      lonA: -122.4194,
-      latB: 34.0522,
-      lonB: -118.2437,
-      age: 25,
-      sex: 'M',
-    });
-    console.log(body);
-    // setLoading(true);
+  const fetchSafestRoute = async (latA, lonA, latB, lonB) => {
+    setLoading(true);
     try {
-      console.log('here');
       const response = await fetch(
-        'http://localhost:3000/api/map/safest-route',
+        'http://10.10.10.248:3000/api/map/safest-route',
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: body,
-          // body: JSON.stringify({
-          //   latA: sourceCoords.latitude,
-          //   lonA: sourceCoords.longitude,
-          //   latB: destinationCoords.latitude,
-          //   lonB: destinationCoords.longitude,
-          //   age: 25,
-          //   sex: 'M',
-          // }),
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            latA,
+            lonA,
+            latB,
+            lonB,
+            age: 25,
+            sex: 'M',
+          }),
         },
       );
-      console.log('aaya phirse');
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const data = await response.text(); // Ensure it's plain HTML
-      console.log('Response' + response);
+      const data = await response.text();
       setMapsHTML(data);
-      console.log(mapsHTML);
-    } catch (err) {
-      setError(err.message);
+    } catch (error) {
+      console.error('Error fetching route:', error);
     } finally {
       setLoading(false);
     }
@@ -124,14 +106,12 @@ const LocationAutocomplete = () => {
         return;
       }
 
-      console.log('Source:', sourceCoords);
-      console.log('Destination:', destinationCoords);
-
-      // Mapbox API ko yahan call kar sakta hai for directions
-      alert(
-        `Finding directions from (${sourceCoords.latitude}, ${sourceCoords.longitude}) to (${destinationCoords.latitude}, ${destinationCoords.longitude})`,
+      fetchSafestRoute(
+        sourceCoords.latitude,
+        sourceCoords.longitude,
+        destinationCoords.latitude,
+        destinationCoords.longitude,
       );
-      fetchSafestRoute();
     } catch (error) {
       console.error('Error fetching directions:', error);
     }
@@ -183,10 +163,29 @@ const LocationAutocomplete = () => {
           </TouchableOpacity>
         )}
       />
-      {/* Find Directions Button */}
       <TouchableOpacity style={styles.button} onPress={handleFindDirections}>
         <Text style={styles.buttonText}>Find Directions</Text>
       </TouchableOpacity>
+
+      {/* Show loading spinner while fetching map */}
+      {loading && (
+        <ActivityIndicator
+          size="large"
+          color="#007bff"
+          style={{marginTop: 20}}
+        />
+      )}
+
+      {/* Render HTML response inside WebView */}
+      {mapsHTML ? (
+        <View style={styles.webViewContainer}>
+          <WebView
+            originWhitelist={['*']}
+            source={{html: mapsHTML}}
+            style={styles.webView}
+          />
+        </View>
+      ) : null}
     </View>
   );
 };
@@ -194,6 +193,8 @@ const LocationAutocomplete = () => {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    flex: 1,
+    backgroundColor: '#fff',
   },
   input: {
     height: 50,
@@ -222,6 +223,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  webViewContainer: {
+    flex: 1,
+    marginTop: 20,
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  webView: {
+    flex: 1,
+  },
 });
 
-export default LocationAutocomplete;
+export default NavigationPage;
