@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, {useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,9 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
 const FloatingButton = () => {
   const navigation = useNavigation();
@@ -19,26 +19,27 @@ const FloatingButton = () => {
   const tapRef = useRef(null);
 
   // **Set Default Position (Top Right)**
-  const pan = useRef(new Animated.ValueXY({ 
-    x: width / 2 - 75, 
-    y: height / 2 - height + 100, 
-  })).current;
+  const pan = useRef(
+    new Animated.ValueXY({
+      x: width / 2 - 175,
+      y: height / 2 - height + 150,
+    }),
+  ).current;
 
   // **Handle Dragging**
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
-        pan.setOffset({ x: pan.x._value, y: pan.y._value });
+        pan.setOffset({x: pan.x._value, y: pan.y._value});
       },
-      onPanResponderMove: Animated.event(
-        [null, { dx: pan.x, dy: pan.y }],
-        { useNativeDriver: false }
-      ),
+      onPanResponderMove: Animated.event([null, {dx: pan.x, dy: pan.y}], {
+        useNativeDriver: false,
+      }),
       onPanResponderRelease: () => {
         pan.flattenOffset(); // No automatic repositioning
-      }
-    })
+      },
+    }),
   ).current;
 
   // **Handle Double Tap to Navigate to SaheliScreen**
@@ -59,18 +60,19 @@ const FloatingButton = () => {
     <Animated.View
       style={[
         styles.floatingContainer,
-        { transform: pan.getTranslateTransform() }
+        {transform: pan.getTranslateTransform()},
       ]}
-      {...panResponder.panHandlers}
-    >
+      {...panResponder.panHandlers}>
       {/* SAHELI Button */}
-      <TouchableOpacity 
-        style={[styles.saheliButton, expanded && styles.saheliButtonExpanded]} 
-        onPress={toggleExpand} 
+      <TouchableOpacity
+        style={[styles.saheliButton, expanded && styles.saheliButtonExpanded]}
+        onPress={toggleExpand}
         onLongPress={handleDoubleTap} // **Double Tap Navigation**
       >
         <Image
-          source={{ uri: 'https://cdn-icons-png.flaticon.com/128/163/163847.png' }}
+          source={{
+            uri: 'https://cdn-icons-png.flaticon.com/128/163/163847.png',
+          }}
           style={styles.icon}
         />
         <Text style={styles.text}>SAHELI</Text>
@@ -80,13 +82,30 @@ const FloatingButton = () => {
       {expanded && (
         <View style={styles.optionsContainer}>
           <TouchableOpacity style={styles.callButton}>
-            <Image source={{ uri: 'https://uxwing.com/wp-content/themes/uxwing/download/communication-chat-call/accept-call-icon.png' }} style={styles.callIcon} />
+            <Image
+              source={{
+                uri: 'https://uxwing.com/wp-content/themes/uxwing/download/communication-chat-call/accept-call-icon.png',
+              }}
+              style={styles.callIcon}
+            />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.muteButton} onPress={() => navigation.navigate("SaheliScreen")}>
-            <Image source={{ uri: 'https://cdn-icons-png.flaticon.com/128/15/15874.png' }} style={styles.muteIcon} />
+          <TouchableOpacity
+            style={styles.muteButton}
+            onPress={() => navigation.navigate('SaheliScreen')}>
+            <Image
+              source={{
+                uri: 'https://cdn-icons-png.flaticon.com/128/15/15874.png',
+              }}
+              style={styles.muteIcon}
+            />
           </TouchableOpacity>
           <TouchableOpacity style={styles.endButton}>
-            <Image source={{ uri: 'https://uxwing.com/wp-content/themes/uxwing/download/communication-chat-call/end-call-icon.png' }} style={styles.callIcon} />
+            <Image
+              source={{
+                uri: 'https://uxwing.com/wp-content/themes/uxwing/download/communication-chat-call/end-call-icon.png',
+              }}
+              style={styles.callIcon}
+            />
           </TouchableOpacity>
         </View>
       )}
@@ -97,7 +116,9 @@ const FloatingButton = () => {
 const styles = StyleSheet.create({
   floatingContainer: {
     position: 'absolute',
-    zIndex: 1000,
+    bottom: 20, // Adjust position
+    right: 20,
+    zIndex: 9999,
   },
   saheliButton: {
     flexDirection: 'row',
