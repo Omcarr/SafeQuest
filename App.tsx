@@ -11,6 +11,7 @@ import TermsPrivacy from './pages/settings/TermsPrivacy';
 import AboutSafeQuest from './pages/settings/AboutSafeQuest';
 import Tutorial from './pages/Tutorial';
 import SaheliScreen from './pages/SaheliScreen';
+import { UserProvider } from './userContext';
 
 
 const Stack = createNativeStackNavigator();
@@ -19,6 +20,7 @@ const App = () => {
   const [isIntroDone, setIntroDone] = useState(false);
 
   return (
+    <UserProvider>
     <View style={{ flex: 1, backgroundColor: '#001F3F' }}>
       {/* Show Intro first, then load the app */}
       {!isIntroDone ? (
@@ -40,6 +42,7 @@ const App = () => {
         </NavigationContainer>
       )}
     </View>
+    </UserProvider>
   );
 };
 

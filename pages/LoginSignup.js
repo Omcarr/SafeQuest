@@ -14,11 +14,13 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import DropDownPicker from 'react-native-dropdown-picker';
 import {TextInput} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
+import {useUser} from '../userContext';
 
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const {setUserData} = useUser();
   const [formData, setFormData] = useState({
     username: '',
     age: '',
@@ -96,29 +98,42 @@ const LoginSignup = () => {
   };
 
   const handleSubmit = () => {
-    console.log(formData);
-    fetch('https://51a4-103-97-166-170.ngrok-free.app/login/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: formData.email,
-        password: formData.password,
-      }),
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        setFormData(data);
-        console.log('Success:', data);
-        navigation.replace('MainApp'); // Redirect to MainApp
-      })
-      .catch(error => console.error('Error:', error));
+    // console.log(formData);
+    // fetch('https://51a4-103-97-166-170.ngrok-free.app/login/', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({
+    //     email: formData.email,
+    //     password: formData.password,
+    //   }),
+    // })
+    //   .then(response => {
+    //     if (!response.ok) {
+    //       throw new Error(`HTTP error! Status: ${response.status}`);
+    //     }
+    //     return response.json();
+    //   })
+    //   .then(data => {
+    //     setFormData(data);
+    //     setUserData(data);
+    //     console.log('Success:', data);
+    //     navigation.replace('MainApp'); // Redirect to MainApp
+    //   })
+    //   .catch(error => console.error('Error:', error));
+
+    const data = {
+      name: 'John  ki mkb',
+      age: 30,
+      sex: 'Male',
+      profilePhoto: 'https://cdn-icons-png.flaticon.com/128/2202/2202112.png',
+    };
+
+    setFormData(data);
+    setUserData(data);
+    console.log('Success:', data);
+    navigation.replace('MainApp');
   };
 
   return (

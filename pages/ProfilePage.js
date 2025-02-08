@@ -10,14 +10,18 @@ import {
   TouchableOpacity,
   Modal,
 } from 'react-native';
+import {useUser} from '../userContext';
 
 const ProfilePage = ({navigation}) => {
-  const user = {
-    name: 'John Doe',
-    age: 30,
-    sex: 'Male',
-    profilePhoto: 'https://cdn-icons-png.flaticon.com/128/2202/2202112.png',
-  };
+  // const user = {
+  //   name: 'John Doe',
+  //   age: 30,
+  //   sex: 'Male',
+  //   profilePhoto: 'https://cdn-icons-png.flaticon.com/128/2202/2202112.png',
+  // };
+
+  const {userData} = useUser();
+  const user = userData;
 
   const familyMembers = [
     {
@@ -227,7 +231,9 @@ const ProfilePage = ({navigation}) => {
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
           <Image
-            source={{ uri: 'https://cdn-icons-png.flaticon.com/128/9333/9333993.png' }}
+            source={{
+              uri: 'https://cdn-icons-png.flaticon.com/128/9333/9333993.png',
+            }}
             style={styles.settingsButton}
           />
         </TouchableOpacity>
