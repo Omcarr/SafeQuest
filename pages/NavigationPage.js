@@ -1,10 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import FloatingButton from '../components/FloatingButton'; // Import the floating button
 
 const NavigationPage = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Navigation Page (Coming Soon)</Text>
+
+      {/* Floating Button for Saheli */}
+      <FloatingButton />
     </View>
   );
 };

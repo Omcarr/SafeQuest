@@ -9,6 +9,8 @@ import Intro from './Intro'; // Importing the animated intro screen
 import Settings from './pages/Settings';
 import TermsPrivacy from './pages/settings/TermsPrivacy';
 import AboutSafeQuest from './pages/settings/AboutSafeQuest';
+import Tutorial from './pages/Tutorial';
+import SaheliScreen from './pages/SaheliScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -24,6 +26,7 @@ const App = () => {
       ) : (
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }}>
+            {/* <Stack.Screen name="Tutorial" component={Tutorial} /> */}
             {/* Uncomment below if you need LoginSignup */}
             {/* <Stack.Screen name="LoginSignup" component={LoginSignup} /> */}
             <Stack.Screen name="MainApp" component={Navbar} />
@@ -31,6 +34,7 @@ const App = () => {
             <Stack.Screen name="Settings" component={Settings} /> 
             <Stack.Screen name="TermsPrivacy" component={TermsPrivacy} />
             <Stack.Screen name="AboutSafeQuest" component={AboutSafeQuest} />
+            <Stack.Screen name="SaheliScreen" component={SaheliScreen} />
 
           </Stack.Navigator>
         </NavigationContainer>
