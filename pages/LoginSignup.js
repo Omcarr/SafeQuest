@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -10,17 +10,17 @@ import {
   Platform,
   PermissionsAndroid,
 } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
+import {launchImageLibrary} from 'react-native-image-picker';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { TextInput } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import {TextInput} from 'react-native-paper';
+import {useNavigation} from '@react-navigation/native';
 
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     age: '',
     sex: 'Male',
     profilePic: 'https://cdn-icons-png.flaticon.com/128/15315/15315520.png', // Default Profile Picture
@@ -33,21 +33,23 @@ const LoginSignup = () => {
   const [open, setOpen] = useState(false);
   const [gender, setGender] = useState('Male');
   const [items, setItems] = useState([
-    { label: 'Male', value: 'Male' },
-    { label: 'Female', value: 'Female' },
-    { label: 'Other', value: 'Other' },
+    {label: 'Male', value: 'Male'},
+    {label: 'Female', value: 'Female'},
+    {label: 'Other', value: 'Other'},
   ]);
 
   const navigation = useNavigation();
 
   const handleInputChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
+    setFormData({...formData, [field]: value});
   };
 
   // Request Permission for Android Media Picker
   const requestPermission = async () => {
     if (Platform.OS === 'android') {
-      const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+      );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     }
     return true;
@@ -68,10 +70,10 @@ const LoginSignup = () => {
       quality: 1,
     };
 
-    launchImageLibrary(options, (response) => {
+    launchImageLibrary(options, response => {
       if (response.didCancel) return;
       if (response.assets && response.assets.length > 0) {
-        setFormData({ ...formData, profilePic: response.assets[0].uri });
+        setFormData({...formData, profilePic: response.assets[0].uri});
       }
     });
   };
@@ -94,20 +96,48 @@ const LoginSignup = () => {
   };
 
   const handleSubmit = () => {
-    if (validateInputs()) {
-      navigation.replace('MainApp'); // Redirect to the main app (Navbar.js)
-    }
+    console.log(formData);
+    fetch('https://51a4-103-97-166-170.ngrok-free.app/login/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        setFormData(data);
+        console.log('Success:', data);
+        navigation.replace('MainApp'); // Redirect to MainApp
+      })
+      .catch(error => console.error('Error:', error));
   };
-  
+
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-        
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled">
         {/* Profile Picture */}
         <View style={styles.profileContainer}>
-          <Image source={{ uri: formData.profilePic }} style={styles.profileImage} />
+          <Image
+            source={{uri: formData.profilePic}}
+            style={styles.profileImage}
+          />
           {!isLogin && (
-            <TouchableOpacity onPress={handleImageUpload} style={styles.uploadButton}>
+            <TouchableOpacity
+              onPress={handleImageUpload}
+              style={styles.uploadButton}>
               <Text style={styles.uploadText}>Upload Profile Picture</Text>
             </TouchableOpacity>
           )}
@@ -115,35 +145,156 @@ const LoginSignup = () => {
 
         {/* Tab Switcher */}
         <View style={styles.tabContainer}>
-          <TouchableOpacity onPress={() => setIsLogin(true)} style={[styles.tab, isLogin && styles.activeTab]}>
-            <Text style={[styles.tabText, isLogin && styles.activeTabText]}>Login</Text>
+          <TouchableOpacity
+            onPress={() => setIsLogin(true)}
+            style={[styles.tab, isLogin && styles.activeTab]}>
+            <Text style={[styles.tabText, isLogin && styles.activeTabText]}>
+              Login
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setIsLogin(false)} style={[styles.tab, !isLogin && styles.activeTab]}>
-            <Text style={[styles.tabText, !isLogin && styles.activeTabText]}>Sign Up</Text>
+          <TouchableOpacity
+            onPress={() => setIsLogin(false)}
+            style={[styles.tab, !isLogin && styles.activeTab]}>
+            <Text style={[styles.tabText, !isLogin && styles.activeTabText]}>
+              Sign Up
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Form Fields */}
         {isLogin ? (
           <>
-            <TextInput label="Enter your email" mode="outlined" style={styles.input} keyboardType="email-address" value={formData.email} onChangeText={(text) => handleInputChange('email', text)} />
-            <TextInput label="Enter your password" mode="outlined" style={styles.input} secureTextEntry={!showPassword} right={<TextInput.Icon icon={() => <Image source={{ uri: showPassword ? 'https://cdn-icons-png.flaticon.com/128/9726/9726597.png' : 'https://cdn-icons-png.flaticon.com/128/11502/11502541.png' }} style={styles.eyeIcon} />} onPress={() => setShowPassword(!showPassword)} forceTextInputFocus={false} />} value={formData.password} onChangeText={(text) => handleInputChange('password', text)} />
+            <TextInput
+              label="Enter your email"
+              mode="outlined"
+              style={styles.input}
+              keyboardType="email-address"
+              value={formData.email}
+              onChangeText={text => handleInputChange('email', text)}
+            />
+            <TextInput
+              label="Enter your password"
+              mode="outlined"
+              style={styles.input}
+              secureTextEntry={!showPassword}
+              right={
+                <TextInput.Icon
+                  icon={() => (
+                    <Image
+                      source={{
+                        uri: showPassword
+                          ? 'https://cdn-icons-png.flaticon.com/128/9726/9726597.png'
+                          : 'https://cdn-icons-png.flaticon.com/128/11502/11502541.png',
+                      }}
+                      style={styles.eyeIcon}
+                    />
+                  )}
+                  onPress={() => setShowPassword(!showPassword)}
+                  forceTextInputFocus={false}
+                />
+              }
+              value={formData.password}
+              onChangeText={text => handleInputChange('password', text)}
+            />
           </>
         ) : (
           <>
-            <TextInput label="Full Name" mode="outlined" style={styles.input} value={formData.name} onChangeText={(text) => handleInputChange('name', text)} />
-            <TextInput label="Age" mode="outlined" style={styles.input} keyboardType="numeric" value={formData.age} onChangeText={(text) => handleInputChange('age', text)} />
+            <TextInput
+              label="Full Name"
+              mode="outlined"
+              style={styles.input}
+              value={formData.name}
+              onChangeText={text => handleInputChange('name', text)}
+            />
+            <TextInput
+              label="Age"
+              mode="outlined"
+              style={styles.input}
+              keyboardType="numeric"
+              value={formData.age}
+              onChangeText={text => handleInputChange('age', text)}
+            />
 
             {/* Gender Dropdown */}
             <View style={styles.genderContainer}>
               <Text style={styles.label}>Select Gender</Text>
-              <DropDownPicker open={open} value={gender} items={items} setOpen={setOpen} setValue={setGender} setItems={setItems} containerStyle={styles.pickerContainer} style={styles.picker} dropDownContainerStyle={styles.pickerDropdown} onChangeValue={(value) => handleInputChange('sex', value)} />
+              <DropDownPicker
+                open={open}
+                value={gender}
+                items={items}
+                setOpen={setOpen}
+                setValue={setGender}
+                setItems={setItems}
+                containerStyle={styles.pickerContainer}
+                style={styles.picker}
+                dropDownContainerStyle={styles.pickerDropdown}
+                onChangeValue={value => handleInputChange('sex', value)}
+              />
             </View>
 
-            <TextInput label="Email Address" mode="outlined" style={styles.input} keyboardType="email-address" value={formData.email} onChangeText={(text) => handleInputChange('email', text)} />
-            <TextInput label="Enter your address" mode="outlined" style={styles.input} value={formData.address} onChangeText={(text) => handleInputChange('address', text)} />
-            <TextInput label="Create Password" mode="outlined" style={styles.input} secureTextEntry={!showPassword} right={<TextInput.Icon icon={() => <Image source={{ uri: showPassword ? 'https://cdn-icons-png.flaticon.com/128/9726/9726597.png' : 'https://cdn-icons-png.flaticon.com/128/11502/11502541.png' }} style={styles.eyeIcon} />} onPress={() => setShowPassword(!showPassword)} forceTextInputFocus={false} />} value={formData.password} onChangeText={(text) => handleInputChange('password', text)} />
-            <TextInput label="Confirm Password" mode="outlined" style={styles.input} secureTextEntry={!showConfirmPassword} right={<TextInput.Icon icon={() => <Image source={{ uri: showConfirmPassword ? 'https://cdn-icons-png.flaticon.com/128/9726/9726597.png' : 'https://cdn-icons-png.flaticon.com/128/11502/11502541.png' }} style={styles.eyeIcon} />} onPress={() => setShowConfirmPassword(!showConfirmPassword)} forceTextInputFocus={false} />} value={formData.confirmPassword} onChangeText={(text) => handleInputChange('confirmPassword', text)} />
+            <TextInput
+              label="Email Address"
+              mode="outlined"
+              style={styles.input}
+              keyboardType="email-address"
+              value={formData.email}
+              onChangeText={text => handleInputChange('email', text)}
+            />
+            <TextInput
+              label="Enter your address"
+              mode="outlined"
+              style={styles.input}
+              value={formData.address}
+              onChangeText={text => handleInputChange('address', text)}
+            />
+            <TextInput
+              label="Create Password"
+              mode="outlined"
+              style={styles.input}
+              secureTextEntry={!showPassword}
+              right={
+                <TextInput.Icon
+                  icon={() => (
+                    <Image
+                      source={{
+                        uri: showPassword
+                          ? 'https://cdn-icons-png.flaticon.com/128/9726/9726597.png'
+                          : 'https://cdn-icons-png.flaticon.com/128/11502/11502541.png',
+                      }}
+                      style={styles.eyeIcon}
+                    />
+                  )}
+                  onPress={() => setShowPassword(!showPassword)}
+                  forceTextInputFocus={false}
+                />
+              }
+              value={formData.password}
+              onChangeText={text => handleInputChange('password', text)}
+            />
+            <TextInput
+              label="Confirm Password"
+              mode="outlined"
+              style={styles.input}
+              secureTextEntry={!showConfirmPassword}
+              right={
+                <TextInput.Icon
+                  icon={() => (
+                    <Image
+                      source={{
+                        uri: showConfirmPassword
+                          ? 'https://cdn-icons-png.flaticon.com/128/9726/9726597.png'
+                          : 'https://cdn-icons-png.flaticon.com/128/11502/11502541.png',
+                      }}
+                      style={styles.eyeIcon}
+                    />
+                  )}
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  forceTextInputFocus={false}
+                />
+              }
+              value={formData.confirmPassword}
+              onChangeText={text => handleInputChange('confirmPassword', text)}
+            />
           </>
         )}
 
@@ -151,7 +302,6 @@ const LoginSignup = () => {
         <TouchableOpacity style={styles.button} onPress={handleSubmit}>
           <Text style={styles.buttonText}>{isLogin ? 'Login' : 'Sign Up'}</Text>
         </TouchableOpacity>
-
       </ScrollView>
     </KeyboardAvoidingView>
   );
