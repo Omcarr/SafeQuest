@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   Modal,
 } from 'react-native';
 import {useUser} from '../userContext';
+import {API_URL} from './constants';
 
 const ProfilePage = ({navigation}) => {
   // const user = {
@@ -22,23 +23,28 @@ const ProfilePage = ({navigation}) => {
 
   const {userData} = useUser();
   const user = userData;
+  const [familyMembers, setFamilyMembers] = useState(null);
 
-  const familyMembers = [
-    {
-      id: '1',
-      name: 'Jane Doe',
-      age: 28,
-      sex: 'Female',
-      image: 'https://cdn-icons-png.flaticon.com/256/8326/8326711.png',
-    },
-    {
-      id: '2',
-      name: 'Sam Doe',
-      age: 5,
-      sex: 'Male',
-      image: 'https://cdn-icons-png.flaticon.com/256/4825/4825112.png',
-    },
-  ];
+  useEffect(() => {
+    fetchFamily(); // Call fetchData when the page opens
+  }, []);
+
+  // const familyMembers = [
+  //   {
+  //     id: '1',
+  //     name: 'Jane Doe',
+  //     age: 28,
+  //     sex: 'Female',
+  //     image: 'https://cdn-icons-png.flaticon.com/256/8326/8326711.png',
+  //   },
+  //   {
+  //     id: '2',
+  //     name: 'Sam Doe',
+  //     age: 5,
+  //     sex: 'Male',
+  //     image: 'https://cdn-icons-png.flaticon.com/256/4825/4825112.png',
+  //   },
+  // ];
 
   const [savedPlaces, setSavedPlaces] = useState([
     {
@@ -56,6 +62,73 @@ const ProfilePage = ({navigation}) => {
       long: '-73.9352',
     },
   ]);
+
+  const fetchFamily = () => {
+    const url = `${API_URL}api/family-groups/${encodeURIComponent(
+      user.group_id,
+    )}/members`;
+
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (!Array.isArray(data)) {
+          throw new Error('Unexpected response format: expected an array');
+        }
+
+        // Function to calculate age from DOB
+        const calculateAge = dob => {
+          if (!dob) return null;
+          const birthDate = new Date(dob);
+          const today = new Date();
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+
+          // Adjust age if birthday hasn't occurred yet this year
+          if (
+            monthDiff < 0 ||
+            (monthDiff === 0 && today.getDate() < birthDate.getDate())
+          ) {
+            age--;
+          }
+
+          return age;
+        };
+
+        // Process each family member
+        const updatedFamilyData = data.map(member => {
+          const age = calculateAge(member.dob);
+
+          // Set profile picture based on gender
+          const defaultPfp =
+            member.gender === 'Male'
+              ? 'https://cdn-icons-png.flaticon.com/128/2202/2202112.png'
+              : 'https://cdn-icons-png.flaticon.com/128/6997/6997662.png';
+
+          return {
+            ...member,
+            age,
+            pfp: member.pfp ? member.pfp : defaultPfp,
+          };
+        });
+
+        // Update state with the processed family data
+        setFamilyMembers(updatedFamilyData);
+        console.log(familyMembers);
+        console.log('Success:', updatedFamilyData);
+        // Redirect to MainApp
+      })
+      .catch(error => console.error('Error:', error));
+  };
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editingPlace, setEditingPlace] = useState(null);
@@ -105,10 +178,10 @@ const ProfilePage = ({navigation}) => {
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{user.name}</Text>
           <Text>
-            {user.age} | {user.sex}
+            {user.age} | {user.gender}
           </Text>
         </View>
-        <Image source={{uri: user.profilePhoto}} style={styles.profilePhoto} />
+        <Image source={{uri: user.pfp}} style={styles.profilePhoto} />
       </View>
 
       {/* Family Members Section */}
@@ -116,22 +189,26 @@ const ProfilePage = ({navigation}) => {
       <FlatList
         data={familyMembers}
         keyExtractor={item => item.id}
-        renderItem={({item}) => (
-          <View style={styles.familyMemberContainer}>
-            <Image
-              source={{
-                uri: item.image,
-              }}
-              style={styles.familyMemberAvatar}
-            />
-            <View style={styles.familyMemberDetails}>
-              <Text style={styles.familyMemberName}>{item.name}</Text>
-              <Text style={styles.familyMemberInfo}>
-                {item.age} | {item.sex}
-              </Text>
+        renderItem={({item}) => {
+          if (item.user_id === user.user_id) {
+            return null; // Skip rendering if user_id matches
+          }
+
+          return (
+            <View style={styles.familyMemberContainer}>
+              <Image
+                source={{uri: item.pfp}}
+                style={styles.familyMemberAvatar}
+              />
+              <View style={styles.familyMemberDetails}>
+                <Text style={styles.familyMemberName}>{item.name}</Text>
+                <Text style={styles.familyMemberInfo}>
+                  {item.age} | {item.gender}
+                </Text>
+              </View>
             </View>
-          </View>
-        )}
+          );
+        }}
       />
 
       {/* Saved Places Section */}
@@ -221,7 +298,7 @@ const ProfilePage = ({navigation}) => {
 
       {/* Buttons Section */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={() => console.log('Logging out...')}>
+        <TouchableOpacity onPress={() => console.log(user.group_id)}>
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/660/660350.png',
@@ -252,7 +329,7 @@ const styles = StyleSheet.create({
   },
   userInfo: {flexDirection: 'column'},
   userName: {fontSize: 20, fontWeight: 'bold'},
-  profilePhoto: {width: 80, height: 80, borderRadius: 40},
+  profilePhoto: {width: 70, height: 70, borderRadius: 40},
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',

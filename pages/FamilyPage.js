@@ -6,10 +6,12 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import {API_URL} from './constants';
 
 const FamilyPage = ({navigation}) => {
   console.log(navigation);
-  const [isFamily, setIsFamily] = useState(0);
+  const [isFamily, setIsFamily] = useState(0); //condition to check if part of family
+  const [family, setFamily] = useState(null); ///variable for members data
 
   return (
     <View style={styles.container}>

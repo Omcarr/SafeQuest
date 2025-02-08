@@ -15,6 +15,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import {TextInput} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import {useUser} from '../userContext';
+import {API_URL} from './constants';
 
 const LoginSignup = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -24,7 +25,7 @@ const LoginSignup = () => {
   const [formData, setFormData] = useState({
     username: '',
     age: '',
-    sex: 'Male',
+    sex: '',
     profilePic: 'https://cdn-icons-png.flaticon.com/128/15315/15315520.png', // Default Profile Picture
     email: '',
     address: '',
@@ -98,42 +99,61 @@ const LoginSignup = () => {
   };
 
   const handleSubmit = () => {
-    // console.log(formData);
-    // fetch('https://51a4-103-97-166-170.ngrok-free.app/login/', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     email: formData.email,
-    //     password: formData.password,
-    //   }),
-    // })
-    //   .then(response => {
-    //     if (!response.ok) {
-    //       throw new Error(`HTTP error! Status: ${response.status}`);
-    //     }
-    //     return response.json();
-    //   })
-    //   .then(data => {
-    //     setFormData(data);
-    //     setUserData(data);
-    //     console.log('Success:', data);
-    //     navigation.replace('MainApp'); // Redirect to MainApp
-    //   })
-    //   .catch(error => console.error('Error:', error));
+    console.log(formData);
+    const url = `${API_URL}api/login/?email=${encodeURIComponent(
+      formData.email,
+    )}&password=${encodeURIComponent(formData.password)}`;
 
-    const data = {
-      name: 'John  ki mkb',
-      age: 30,
-      sex: 'Male',
-      profilePhoto: 'https://cdn-icons-png.flaticon.com/128/2202/2202112.png',
-    };
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        const user = data.user;
 
-    setFormData(data);
-    setUserData(data);
-    console.log('Success:', data);
-    navigation.replace('MainApp');
+        // Calculate age from DOB
+        const calculateAge = dob => {
+          const birthDate = new Date(dob);
+          const today = new Date();
+          let age = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+
+          // Adjust age if birthday hasn't occurred yet this year
+          if (
+            monthDiff < 0 ||
+            (monthDiff === 0 && today.getDate() < birthDate.getDate())
+          ) {
+            age--;
+          }
+
+          return age;
+        };
+
+        if (user.pfp === '' && user.gender === 'Male') {
+          user.pfp = 'https://cdn-icons-png.flaticon.com/128/2202/2202112.png';
+        } else {
+          user.pfp = 'https://cdn-icons-png.flaticon.com/128/6997/6997662.png';
+        }
+
+        const age = user.dob ? calculateAge(user.dob) : null;
+
+        // Add age to user data
+        const updatedUser = {...user, age};
+
+        setFormData(updatedUser);
+        setUserData(updatedUser);
+        console.log('Success:', updatedUser);
+        navigation.replace('MainApp'); // Redirect to MainApp
+      })
+      .catch(error => console.error('Error:', error));
   };
 
   return (
