@@ -163,20 +163,21 @@ const LoginSignup = () => {
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled">
-        {/* Profile Picture */}
-        <View style={styles.profileContainer}>
-          <Image
-            source={{uri: formData.profilePic}}
-            style={styles.profileImage}
-          />
-          {!isLogin && (
-            <TouchableOpacity
-              onPress={handleImageUpload}
-              style={styles.uploadButton}>
+
+        {/* Profile Picture (Keeps Space Reserved Even When Hidden) */}
+      <View style={styles.profileContainer}>
+        <Image source={{ uri: formData.profilePic }} style={styles.profileImage} />
+        <View style={styles.uploadButtonContainer}>
+          {!isLogin ? (
+            <TouchableOpacity onPress={handleImageUpload} style={styles.uploadButton}>
               <Text style={styles.uploadText}>Upload Profile Picture</Text>
             </TouchableOpacity>
+          ) : (
+            <View style={styles.uploadButtonPlaceholder} /> // Keeps the space reserved
           )}
         </View>
+      </View>
+
 
         {/* Tab Switcher */}
         <View style={styles.tabContainer}>
@@ -383,6 +384,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EAEAEA',
     borderRadius: 10,
     padding: 5,
+    // marginVertical: 50,
   },
   tab: {
     flex: 1,
@@ -448,4 +450,15 @@ const styles = StyleSheet.create({
     height: 24,
     tintColor: '#555',
   },
+  // uploadButtonContainer: {
+  //   height: 40, // Ensures the space is always reserved
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  // },
+  
+  uploadButtonPlaceholder: {
+    height: 40, // Matches the height of the actual button
+    width: '100%', // Keeps it aligned
+  },
+  
 });
