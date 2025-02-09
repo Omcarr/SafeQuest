@@ -298,7 +298,7 @@ const ProfilePage = ({navigation}) => {
 
       {/* Buttons Section */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={() => console.log(user.group_id)}>
+        <TouchableOpacity onPress={() => navigation.navigate('LoginSignup')}>
           <Image
             source={{
               uri: 'https://cdn-icons-png.flaticon.com/128/660/660350.png',
@@ -414,8 +414,8 @@ const styles = StyleSheet.create({
     width: '100%',
     color: '#333',
     fontSize: 16,
-    backgroundColor: '#f9f9f9', // Light background to improve visibility // Explicitly set placeholder color
-    placeholderTextColor: '#999',
+    backgroundColor: '#f0f0ec', // Light background to improve visibility // Explicitly set placeholder color
+    placeholderTextColor: '#aaa',
   },
   buttonContainer: {
     flexDirection: 'row',

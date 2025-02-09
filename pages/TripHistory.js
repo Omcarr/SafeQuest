@@ -156,8 +156,8 @@ const styles = StyleSheet.create({
 
   tripItem: {
     padding: 15,
-    backgroundColor: '#fff',
-    marginBottom: 10,
+    backgroundColor: '#f0f0ec',
+    marginBottom: 20,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#ddd',

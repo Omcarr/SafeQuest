@@ -170,7 +170,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderRadius: 8,
     marginBottom: 10,
-    elevation: 3,
+    // elevation: 3,
+    borderWidth: 1,
+    borderColor: '#ddd',
   },
   dangerItem: {
     backgroundColor: '#FFEBEE',
