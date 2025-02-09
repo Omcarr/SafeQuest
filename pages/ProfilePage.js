@@ -26,8 +26,13 @@ const ProfilePage = ({navigation}) => {
   const [familyMembers, setFamilyMembers] = useState(null);
 
   useEffect(() => {
-    fetchFamily(); // Call fetchData when the page opens
+    fetchFamily();
+    fetchLocations(); // Call fetchData when the page opens
   }, []);
+
+  useEffect(() => {
+    console.log(savedPlaces);
+  }, [savedPlaces]);
 
   // const familyMembers = [
   //   {
@@ -46,22 +51,24 @@ const ProfilePage = ({navigation}) => {
   //   },
   // ];
 
-  const [savedPlaces, setSavedPlaces] = useState([
-    {
-      id: '1',
-      name: 'Home',
-      address: '123 Main St',
-      lat: '40.7128',
-      long: '-74.0060',
-    },
-    {
-      id: '2',
-      name: 'Work',
-      address: '456 Office Rd',
-      lat: '40.7306',
-      long: '-73.9352',
-    },
-  ]);
+  // const [savedPlaces, setSavedPlaces] = useState([
+  //   {
+  //     id: '1',
+  //     name: 'Home',
+  //     address: '123 Main St',
+  //     lat: '40.7128',
+  //     long: '-74.0060',
+  //   },
+  //   {
+  //     id: '2',
+  //     name: 'Work',
+  //     address: '456 Office Rd',
+  //     lat: '40.7306',
+  //     long: '-73.9352',
+  //   },
+  // ]);
+
+  const [savedPlaces, setSavedPlaces] = useState(null);
 
   const fetchFamily = () => {
     const url = `${API_URL}api/family-groups/${encodeURIComponent(
@@ -125,6 +132,37 @@ const ProfilePage = ({navigation}) => {
         setFamilyMembers(updatedFamilyData);
         console.log(familyMembers);
         console.log('Success:', updatedFamilyData);
+        // Redirect to MainApp
+      })
+      .catch(error => console.error('Error:', error));
+  };
+
+  const fetchLocations = () => {
+    console.log('aaya');
+    const url = `${API_URL}api/locations/${encodeURIComponent(user.user_id)}`;
+
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (!Array.isArray(data)) {
+          throw new Error('Unexpected response format: expected an array');
+        }
+
+        // Update state with the processed family data
+        setSavedPlaces(data);
+        console.log(data);
+        console.log(savedPlaces);
+
         // Redirect to MainApp
       })
       .catch(error => console.error('Error:', error));
@@ -223,7 +261,7 @@ const ProfilePage = ({navigation}) => {
         keyExtractor={item => item.id}
         renderItem={({item}) => (
           <View style={styles.placeItem}>
-            <Text style={{flex: 1}}>{item.address}</Text>
+            <Text style={{flex: 1}}>{item.location_name}</Text>
             <View style={styles.iconContainer}>
               <TouchableOpacity onPress={() => openModal(item)}>
                 <Image
@@ -254,28 +292,30 @@ const ProfilePage = ({navigation}) => {
               style={styles.placeInput}
               placeholder="Enter name"
               placeholderTextColor="#666"
-              value={newPlace.name || ''}
+              value={newPlace.location_name || ''}
               onChangeText={text => setNewPlace({...newPlace, name: text})}
             />
-            <TextInput
+            {/* <TextInput
               style={styles.placeInput}
               placeholder="Enter address"
               placeholderTextColor="#666"
               value={newPlace.address || ''}
               onChangeText={text => setNewPlace({...newPlace, address: text})}
-            />
+            /> */}
             <TextInput
               style={styles.placeInput}
               placeholder="Enter latitude"
               placeholderTextColor="#666"
-              value={newPlace.lat || ''}
+              vkeyboardType="numeric"
+              value={newPlace.latitude ? String(newPlace.latitude) : ''}
               onChangeText={text => setNewPlace({...newPlace, lat: text})}
             />
             <TextInput
               style={styles.placeInput}
               placeholder="Enter longitude"
               placeholderTextColor="#666"
-              value={newPlace.long || ''}
+              keyboardType="numeric"
+              value={newPlace.longitude ? String(newPlace.longitude) : ''}
               onChangeText={text => setNewPlace({...newPlace, long: text})}
             />
             <View style={styles.modalButtonContainer}>
