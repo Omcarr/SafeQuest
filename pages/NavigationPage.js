@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   TextInput,
@@ -7,15 +7,17 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Image,
 } from 'react-native';
-import {WebView} from 'react-native-webview';
-import {useUser} from '../userContext';
+import { WebView } from 'react-native-webview';
+import { useUser } from '../userContext';
+import FloatingButton from '../components/FloatingButton';
 
-const MAPBOX_API_KEY =
-  'pk.eyJ1Ijoid2ViLWNvZGVncmFtbWVyIiwiYSI6ImNraHB2dXJvajFldTAzMm14Y2lveTB3a3cifQ.LfZtv0p9GUZCP7ZVuT33ow';
+
+const MAPBOX_API_KEY = 'pk.eyJ1Ijoid2ViLWNvZGVncmFtbWVyIiwiYSI6ImNraHB2dXJvajFldTAzMm14Y2lveTB3a3cifQ.LfZtv0p9GUZCP7ZVuT33ow';
 
 const NavigationPage = () => {
-  const {userData} = useUser();
+  const { userData } = useUser();
   const user = userData;
   const [source, setSource] = useState('');
   const [destination, setDestination] = useState('');
@@ -23,12 +25,12 @@ const NavigationPage = () => {
   const [destinationSuggestions, setDestinationSuggestions] = useState([]);
   const [mapsHTML, setMapsHTML] = useState('');
   const [loading, setLoading] = useState(false);
+  const [satisfaction, setSatisfaction] = useState(null);
+  const [activeInput, setActiveInput] = useState(null); // NEW STATE FOR ACTIVE INPUT FIELD
 
   const fetchSuggestions = async (query, setSuggestions) => {
     if (query.length < 3) return;
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-      query,
-    )}.json?access_token=${MAPBOX_API_KEY}&autocomplete=true&limit=5`;
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_API_KEY}&autocomplete=true&limit=5`;
     try {
       const response = await fetch(url);
       const data = await response.json();
@@ -39,9 +41,7 @@ const NavigationPage = () => {
   };
 
   const fetchLatLong = async location => {
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-      location,
-    )}.json?access_token=${MAPBOX_API_KEY}&limit=1`;
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?access_token=${MAPBOX_API_KEY}&limit=1`;
 
     try {
       const response = await fetch(url);
@@ -49,7 +49,7 @@ const NavigationPage = () => {
 
       if (data.features && data.features.length > 0) {
         const coordinates = data.features[0].geometry.coordinates;
-        return {latitude: coordinates[1], longitude: coordinates[0]};
+        return { latitude: coordinates[1], longitude: coordinates[0] };
       } else {
         throw new Error('Location not found');
       }
@@ -62,21 +62,18 @@ const NavigationPage = () => {
   const fetchSafestRoute = async (latA, lonA, latB, lonB) => {
     setLoading(true);
     try {
-      const response = await fetch(
-        'http://10.10.10.248:3000/api/map/safest-route',
-        {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            latA,
-            lonA,
-            latB,
-            lonB,
-            age: 25,
-            sex: 'M',
-          }),
-        },
-      );
+      const response = await fetch('http://192.168.115.250:3000/api/map/safest-route', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          latA,
+          lonA,
+          latB,
+          lonB,
+          age: 25,
+          sex: 'M',
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -119,91 +116,145 @@ const NavigationPage = () => {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter source location"
-        value={source}
-        onChangeText={text => {
-          setSource(text);
-          fetchSuggestions(text, setSourceSuggestions);
-        }}
-      />
-      <FlatList
-        data={sourceSuggestions}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({item}) => (
-          <TouchableOpacity
-            onPress={() => {
-              setSource(item);
-              setSourceSuggestions([]);
-            }}>
-            <Text style={styles.suggestion}>{item}</Text>
-          </TouchableOpacity>
-        )}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Enter destination location"
-        value={destination}
-        onChangeText={text => {
-          setDestination(text);
-          fetchSuggestions(text, setDestinationSuggestions);
-        }}
-      />
-      <FlatList
-        data={destinationSuggestions}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({item}) => (
-          <TouchableOpacity
-            onPress={() => {
-              setDestination(item);
-              setDestinationSuggestions([]);
-            }}>
-            <Text style={styles.suggestion}>{item}</Text>
-          </TouchableOpacity>
-        )}
-      />
+      {/* Source Input Field */}
+      <View style={styles.inputContainer}>
+        <Image source={{ uri: 'https://cdn-icons-png.flaticon.com/128/149/149059.png' }} style={styles.icon} />
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your location"
+          placeholderTextColor="#000"
+          value={source}
+          onChangeText={(text) => {
+            setSource(text);
+            setActiveInput('source'); // Set active field
+            fetchSuggestions(text, setSourceSuggestions);
+          }}
+          onFocus={() => setActiveInput('source')} // When clicked, set it active
+        />
+      </View>
+
+      {/* Destination Input Field */}
+      <View style={styles.inputContainer}>
+        <Image source={{ uri: 'https://cdn-icons-png.flaticon.com/128/2776/2776067.png' }} style={styles.icon} />
+        <TextInput
+          style={styles.input}
+          placeholder="Enter destination location"
+          placeholderTextColor="#000"
+          value={destination}
+          onChangeText={(text) => {
+            setDestination(text);
+            setActiveInput('destination'); // Set active field
+            fetchSuggestions(text, setDestinationSuggestions);
+          }}
+          onFocus={() => setActiveInput('destination')} // When clicked, set it active
+        />
+      </View>
+
+      {/* Show suggestions only for active input field */}
+      {activeInput === 'source' && sourceSuggestions.length > 0 && (
+        <FlatList
+          data={sourceSuggestions}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.suggestion}
+              onPress={() => {
+                setSource(item);
+                setSourceSuggestions([]);
+              }}
+            >
+              <Text style={styles.suggestionText}>{item}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      )}
+
+      {activeInput === 'destination' && destinationSuggestions.length > 0 && (
+        <FlatList
+          data={destinationSuggestions}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.suggestion}
+              onPress={() => {
+                setDestination(item);
+                setDestinationSuggestions([]);
+              }}
+            >
+              <Text style={styles.suggestionText}>{item}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      )}
+
+      {/* Find Directions Button */}
       <TouchableOpacity style={styles.button} onPress={handleFindDirections}>
         <Text style={styles.buttonText}>Find Directions</Text>
       </TouchableOpacity>
 
-      {/* Show loading spinner while fetching map */}
-      {loading && (
-        <ActivityIndicator
-          size="large"
-          color="#007bff"
-          style={{marginTop: 20}}
-        />
-      )}
+      {/* Loading Indicator */}
+      {loading && <ActivityIndicator size="large" color="#007bff" style={{ marginTop: 20 }} />}
 
-      {/* Render HTML response inside WebView */}
+      {/* Map Display - Full Screen Below Button */}
       {mapsHTML ? (
-        <View style={styles.webViewContainer}>
-          <WebView
-            originWhitelist={['*']}
-            source={{html: mapsHTML}}
-            style={styles.webView}
-          />
+        <View style={styles.mapContainer}>
+          <WebView originWhitelist={['*']} source={{ html: mapsHTML }} style={styles.webView} />
+
+          {/* Are You Satisfied Section */}
+          <View style={styles.satisfactionContainer}>
+          {/* Row with text and buttons */}
+          <View style={styles.satisfactionRow}>
+            <Text style={styles.satisfactionText}>Are you satisfied?</Text>
+            <View style={styles.satisfactionButtons}>
+              <TouchableOpacity style={styles.satisfactionButtonYes} onPress={() => setSatisfaction('positive')}>
+                <Text style={styles.satisfactionButtonText}>Yes</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.satisfactionButtonNo} onPress={() => setSatisfaction('negative')}>
+                <Text style={styles.satisfactionButtonText}>No</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Positive feedback appears below */}
+          {satisfaction === 'positive' && (
+            <Text style={styles.positiveFeedback}>Great! Glad this helped. 😊</Text>
+          )}
+        </View>
         </View>
       ) : null}
+      <FloatingButton />
     </View>
   );
 };
 
+// **STYLING**
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
     flex: 1,
-    backgroundColor: '#fff',
+    padding: 20,
+    backgroundColor: '#f9f9f9',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f0ec',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  icon: {
+    width: 24,
+    height: 24,
+    marginRight: 10,
+    tintColor: '#555',
   },
   input: {
+    flex: 1,
     height: 50,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-    borderRadius: 5,
     fontSize: 16,
+    color: '#333',
   },
   suggestion: {
     padding: 10,
@@ -211,10 +262,14 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ddd',
     backgroundColor: '#f9f9f9',
   },
+  suggestionText: {
+    fontSize: 16,
+    color: '#333',
+  },
   button: {
     backgroundColor: '#007bff',
-    padding: 12,
-    borderRadius: 5,
+    padding: 15,
+    borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
   },
@@ -223,15 +278,59 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  webViewContainer: {
-    flex: 1,
-    marginTop: 20,
+  mapContainer: {
+    flex: 1, // Takes full available space
+    marginTop: 10,
     borderRadius: 10,
     overflow: 'hidden',
   },
   webView: {
     flex: 1,
   },
+  satisfactionContainer: {
+    marginTop: 8, 
+    width: '100%', 
+    paddingHorizontal: 10,
+  },
+  satisfactionRow: {
+    flexDirection: 'row', // Keep "Are you satisfied?" & buttons in a row
+    alignItems: 'center',
+    justifyContent: 'space-between', // Space out text and buttons
+  },
+  satisfactionText: {
+    fontSize: 14, 
+    fontWeight: 'bold',
+    flex: 1, 
+  },
+  satisfactionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  satisfactionButtonYes: {
+    marginHorizontal: 5, 
+    paddingVertical: 5,  
+    paddingHorizontal: 10,
+    backgroundColor: '#abf7b1',
+    borderRadius: 4,
+  },
+  satisfactionButtonNo: {
+    marginHorizontal: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: '#FFC0CB',
+    borderRadius: 4,
+  },
+  satisfactionButtonText: {
+    fontSize: 12, 
+  },
+  positiveFeedback: {
+    marginTop: 5, // Add space below Yes/No buttons
+    color: 'green',
+    fontSize: 13, 
+    textAlign: 'center', // Center align for better UI
+  },
+
+
 });
 
 export default NavigationPage;
