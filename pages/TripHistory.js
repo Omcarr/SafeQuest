@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,32 +10,40 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
+import {useUser} from '../userContext';
+import {API_URL} from './constants';
+import {format} from 'date-fns';
+
+// const TripHistory = () => {
+//   // Sample trips data
+//   const trips = [
+//     {
+//       id: '1',
+//       date: '01-02-2024',
+//       time: '10:00 AM',
+//       source: 'Mumbai',
+//       destination: 'Goa',
+//     },
+//     {
+//       id: '2',
+//       date: '05-02-2024',
+//       time: '8:30 AM',
+//       source: 'Delhi',
+//       destination: 'Agra',
+//     },
+//     {
+//       id: '3',
+//       date: '15-01-2024',
+//       time: '12:00 PM',
+//       source: 'Bangalore',
+//       destination: 'Mysore',
+//     },
+//   ];
 
 const TripHistory = () => {
-  // Sample trips data
-  const trips = [
-    {
-      id: '1',
-      date: '01-02-2024',
-      time: '10:00 AM',
-      source: 'Mumbai',
-      destination: 'Goa',
-    },
-    {
-      id: '2',
-      date: '05-02-2024',
-      time: '8:30 AM',
-      source: 'Delhi',
-      destination: 'Agra',
-    },
-    {
-      id: '3',
-      date: '15-01-2024',
-      time: '12:00 PM',
-      source: 'Bangalore',
-      destination: 'Mysore',
-    },
-  ];
+  const [trips, setTrips] = useState([]);
+  const {userData} = useUser();
+  const user = userData;
 
   // States for modal visibility and trip review
   const [modalVisible, setModalVisible] = useState(false);
@@ -58,21 +66,66 @@ const TripHistory = () => {
     closeModal();
   };
 
-  const renderItem = ({item}) => (
-    <View style={styles.tripItem}>
-      <Text style={styles.tripRoute}>
-        {item.source} to {item.destination}
-      </Text>
-      <Text style={styles.tripDateTime}>
-        {item.date} at {item.time}
-      </Text>
-      <TouchableOpacity
-        onPress={() => openModal(item)}
-        style={styles.tripButton}>
-        <Text style={styles.buttonText}>View Details</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  const fetchHistory = () => {
+    console.log('aaya');
+    const url = `${API_URL}api/past_trips/${encodeURIComponent(user.user_id)}`;
+
+    fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (!Array.isArray(data)) {
+          throw new Error('Unexpected response format: expected an array');
+        }
+
+        // Update state with the processed family data
+        setTrips(data);
+        console.log(data);
+
+        // Redirect to MainApp
+      })
+      .catch(error => console.error('Error:', error));
+  };
+
+  useEffect(() => {
+    fetchHistory(); // Call fetchData when the page opens
+  }, []);
+
+  const renderItem = ({item}) => {
+    const formattedDate = item.trip_date
+      ? format(new Date(item.trip_date), 'dd-MM-yyyy')
+      : 'Invalid Date';
+
+    // Convert time if it's stored as "HH:mm:ss"
+    const formattedTime = item.trip_time
+      ? item.trip_time.substring(11, 16) // Extract HH:mm
+      : 'Invalid Time';
+
+    return (
+      <View style={styles.tripItem}>
+        <Text style={styles.tripRoute}>
+          {item.start_location_name} to {item.destination_name}
+        </Text>
+        <Text style={styles.tripDateTime}>
+          {formattedDate} at {formattedTime}
+        </Text>
+        <TouchableOpacity
+          onPress={() => openModal(item)}
+          style={styles.tripButton}>
+          <Text style={styles.buttonText}>View Details</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -101,11 +154,12 @@ const TripHistory = () => {
                 <View style={styles.tripDetailsText}>
                   <Text style={styles.tripDetailText}>Trip Details</Text>
                   <Text>
-                    {selectedTrip.source} to {selectedTrip.destination}
+                    {selectedTrip.start_location_name} to{' '}
+                    {selectedTrip.destination_name}
                   </Text>
-                  <Text>
+                  {/* <Text>
                     {selectedTrip.date} at {selectedTrip.time}
-                  </Text>
+                  </Text> */}
                 </View>
               </View>
             )}
