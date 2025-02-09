@@ -89,13 +89,57 @@ const SaheliScreen = ({route}) => {
     }
   };
 
+  // const stopRecording = async () => {
+  //   try {
+  //     await audioRecorderPlayer.stopRecorder();
+  //     setIsRecording(false);
+  //     console.log('Recording stopped:', recordedFile);
+
+  //   } catch (error) {
+  //     console.error('Stop recording error:', error);
+  //   }
+  // };
   const stopRecording = async () => {
     try {
       await audioRecorderPlayer.stopRecorder();
       setIsRecording(false);
       console.log('Recording stopped:', recordedFile);
+
+      if (!recordedFile) {
+        console.error('No recorded file found.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', {
+        uri: recordedFile,
+        name: 'recorded_audio.mp3',
+        type: 'audio/mpeg',
+      });
+
+      console.log('Uploading file to Flask server...');
+
+      const response = await fetch('http://10.10.10.248:5000/process_audio', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      console.log('Audio received from Flask:', audioUrl);
+
+      // Play received audio (optional)
+      const audio = new Audio(audioUrl);
+      audio.play();
     } catch (error) {
-      console.error('Stop recording error:', error);
+      console.error('Error while sending file:', error);
     }
   };
 

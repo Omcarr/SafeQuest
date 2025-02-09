@@ -1,30 +1,36 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, ActivityIndicator, StyleSheet, Button} from 'react-native';
+import {View, Text, StyleSheet, ActivityIndicator} from 'react-native';
+import FloatingButton from '../components/FloatingButton'; // Import the floating button
 import {WebView} from 'react-native-webview';
 
-const NavigationPage = () => {
-  const [responseData, setResponseData] = useState(null);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+// const NavigationPage = () => {
+//   return (
+//     <View>
+//       <View style={styles.container}>
+//         <Text style={styles.text}>Navigation Page (Coming Soon)</Text>
 
+//         {/* Floating Button for Saheli */}
+//         <FloatingButton />
+//       </View>
+//       <View style={styles.container}>
+//         <WebView source={{uri: 'https://godfather979.github.io/frontend/'}} />
+//       </View>
+//     </View>
+//   );
+// };
+
+const NavigationPage = () => {
   const fetchSafestRoute = async () => {
     setLoading(true);
     try {
       const response = await fetch(
         'http://localhost:3000/api/map/safest-route',
         {
-          method: 'POST',
+          method: 'POST', // Use POST if sending data in the body
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            latA: 37.7749,
-            lonA: -122.4194,
-            latB: 34.0522,
-            lonB: -118.2437,
-            age: 25,
-            sex: 'M',
-          }),
+          body: JSON.stringify(jagah),
         },
       );
 
@@ -32,7 +38,7 @@ const NavigationPage = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
-      const data = await response.text(); // Ensure it's plain HTML
+      const data = await response.json();
       setResponseData(data);
       console.log(responseData);
     } catch (err) {
@@ -46,37 +52,43 @@ const NavigationPage = () => {
     fetchSafestRoute();
   }, []);
 
-  return (
-    <View>
-      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <Button
-          title="Click Me"
-          onPress={() => Alert.alert('Button Clicked!')}
-        />
-      </View>
-      <View style={{flex: 1}}>
-        {loading && <ActivityIndicator size="large" color="blue" />}
-        {error && <Text style={styles.error}>{error}</Text>}
+  const [jagah, setJagah] = useState({
+    latA: 37.7749,
+    lonA: -122.4194,
+    latB: 34.0522,
+    lonB: -118.2437,
+    age: 25,
+    sex: 'M',
+  });
 
-        {responseData ? (
-          <WebView originWhitelist={['*']} source={{html: responseData}} />
-        ) : (
-          !loading && <Text style={styles.noData}>No Data Available</Text>
-        )}
-      </View>
+  const [responseData, setResponseData] = useState(null); // Store API response
+  const [error, setError] = useState(null); // Handle errors
+  const [loading, setLoading] = useState(false); // Loading state
+  return (
+    <View style={{flex: 1}}>
+      {loading && <ActivityIndicator size="large" color="blue" />}
+      {error && (
+        <Text style={{color: 'red', textAlign: 'center'}}>{error}</Text>
+      )}
+
+      {responseData ? (
+        <WebView originWhitelist={['*']} source={{html: responseData}} />
+      ) : (
+        !loading && <Text style={{textAlign: 'center'}}>No Data Available</Text>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  error: {
-    color: 'red',
-    textAlign: 'center',
-    marginTop: 20,
+  text: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
   },
-  noData: {
-    textAlign: 'center',
-    marginTop: 20,
+  container: {
+    flex: 1,
+    position: 'relative',
   },
 });
 
