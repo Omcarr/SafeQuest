@@ -12,6 +12,9 @@ import AboutSafeQuest from './pages/settings/AboutSafeQuest';
 import Tutorial from './pages/Tutorial';
 import SaheliScreen from './pages/SaheliScreen';
 import { UserProvider } from './userContext';
+import { LogBox } from 'react-native';
+LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
+LogBox.ignoreAllLogs();//Ignore all log notifications
 
 
 const Stack = createNativeStackNavigator();

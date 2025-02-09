@@ -136,7 +136,7 @@ const FamilyPage = ({navigation}) => {
             </Text>
           </View>
         </View>
-      ) : (
+      ) : (<>
         <View>
           <View style={styles.pageHeader}>
             <Text style={styles.headerText}>Family Members</Text>
@@ -171,8 +171,9 @@ const FamilyPage = ({navigation}) => {
             }}
           />
         </View>
-      )}
       <FamilyLoc />
+      </>
+      )}
     </View>
   );
 };
