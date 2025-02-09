@@ -137,7 +137,7 @@ const LoginSignup = () => {
           return age;
         };
 
-        if (user.pfp === '' && user.gender === 'Male') {
+        if (user.pfp === '' || user.gender === 'Male') {
           user.pfp = 'https://cdn-icons-png.flaticon.com/128/2202/2202112.png';
         } else {
           user.pfp = 'https://cdn-icons-png.flaticon.com/128/6997/6997662.png';
@@ -163,21 +163,24 @@ const LoginSignup = () => {
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled">
-
         {/* Profile Picture (Keeps Space Reserved Even When Hidden) */}
-      <View style={styles.profileContainer}>
-        <Image source={{ uri: formData.profilePic }} style={styles.profileImage} />
-        <View style={styles.uploadButtonContainer}>
-          {!isLogin ? (
-            <TouchableOpacity onPress={handleImageUpload} style={styles.uploadButton}>
-              <Text style={styles.uploadText}>Upload Profile Picture</Text>
-            </TouchableOpacity>
-          ) : (
-            <View style={styles.uploadButtonPlaceholder} /> // Keeps the space reserved
-          )}
+        <View style={styles.profileContainer}>
+          <Image
+            source={{uri: formData.profilePic}}
+            style={styles.profileImage}
+          />
+          <View style={styles.uploadButtonContainer}>
+            {!isLogin ? (
+              <TouchableOpacity
+                onPress={handleImageUpload}
+                style={styles.uploadButton}>
+                <Text style={styles.uploadText}>Upload Profile Picture</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.uploadButtonPlaceholder} /> // Keeps the space reserved
+            )}
+          </View>
         </View>
-      </View>
-
 
         {/* Tab Switcher */}
         <View style={styles.tabContainer}>
@@ -455,10 +458,9 @@ const styles = StyleSheet.create({
   //   justifyContent: 'center',
   //   alignItems: 'center',
   // },
-  
+
   uploadButtonPlaceholder: {
     height: 40, // Matches the height of the actual button
     width: '100%', // Keeps it aligned
   },
-  
 });
