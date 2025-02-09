@@ -19,16 +19,48 @@ import DropDownPicker from 'react-native-dropdown-picker';
 
 const NEWS_API_URL = "http://10.10.11.236:5000/news?location=Chicago"; // Replace with your backend API
 
-// Dummy News Data (Used while fetching real news)
+// Dummy News Data (Crime & Safety in Chicago)
 const dummyNewsData = [
   {
     author: "John Doe",
     title: "Chicago Implements New Safety Measures to Protect Women at Night",
     description: "The city has introduced new street lighting and emergency response stations.",
     url: "https://www.bbc.com/news",
-    urlToImage: "https://media.istockphoto.com/id/1163652344/photo/woman-walking-at-night-in-the-city.jpg?s=612x612&w=0&k=20&c=_c-8DGkwe6-q_QSGkSY9ETH_O-vpAtWqFaNjCs56MC0=",
+    urlToImage: "https://media.istockphoto.com/id/1163652344/photo/woman-walking-at-night-in-the-city.jpg?s=612x612&w=0&k=20&c=_c-8DGkwe6-q_QSGkSY9ETH_O-vpAtWqFaNjCs56MC0=", // Replace with actual image later
     publishedAt: "2025-02-05T16:55:58Z",
-  }
+  },
+  {
+    author: "Jane Smith",
+    title: "Child Safety Program Expands Across Chicago Schools",
+    description: "New self-defense training and awareness programs launched for school children.",
+    url: "https://www.bbc.com/news",
+    urlToImage: "https://media.istockphoto.com/id/1011642904/photo/cute-asian-pupil-girl-with-backpack-holding-her-mother-hand-and-going-to-school.jpg?s=612x612&w=0&k=20&c=pijRndwZZqv-M66pMtC0wlZngwGsBDSbf281TGHpyPQ=",
+    publishedAt: "2025-02-03T12:30:20Z",
+  },
+  {
+    author: "Emily Johnson",
+    title: "Crime Rates Drop in Downtown Chicago Amid New Policing Strategies",
+    description: "Recent data shows a 15% decrease in violent crimes due to increased patrols.",
+    url: "https://www.bbc.com/news",
+    urlToImage: "https://media.gettyimages.com/id/895729708/photo/chicago-il-demonstrators-protest-outside-of-the-office-of-senator-dick-durbin-urging-him-to.jpg?s=612x612&w=0&k=20&c=0Gg4T8xOofhNZjr2mL_L_0dUWvHo7EWybRcs6Dbn8Uc=",
+    publishedAt: "2025-01-30T09:12:45Z",
+  },
+  {
+    author: "Michael Brown",
+    title: "Chicago Introduces Panic Button App for Women’s Safety",
+    description: "A new emergency response app allows women to send distress signals to local authorities.",
+    url: "https://www.bbc.com/news",
+    urlToImage: "https://media.gettyimages.com/id/1246654726/photo/sos-emergency-call-sign-displayed-on-a-phone-screen-is-seen-in-this-illustration-photo-taken.jpg?s=612x612&w=0&k=20&c=8vUUtUj7bjIDK1lBqYfONxl7_iJJxc5NEJxbHcEIHvc=",
+    publishedAt: "2025-01-25T14:25:10Z",
+  },
+  {
+    author: "Sarah Thompson",
+    title: "Local NGOs Organize Self-Defense Workshops for Women and Children",
+    description: "Workshops across the city teach basic self-defense techniques and awareness strategies.",
+    url: "https://www.bbc.com/news",
+    urlToImage: "https://media.gettyimages.com/id/658294976/photo/woman-self-defense-trick-against-the-mans-attack-strong-women-practicing-self-defense-martial.jpg?s=612x612&w=0&k=20&c=la_hCmFvuME2WB_2OdVITf3qF0mlT9mCmsbE9EprxmY=",
+    publishedAt: "2025-01-20T18:40:35Z",
+  },
 ];
 
 const CommunityPage = () => {
@@ -167,20 +199,23 @@ const CommunityPage = () => {
       </View>
 
       {/* NEWS LIST */}
-      {loadingNews ? (
-        <ActivityIndicator size="large" color="#007BFF" style={{ marginTop: 20 }} />
-      ) : (
-        <FlatList
-          data={newsData}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => Linking.openURL(item.url)} style={styles.card}>
+      <FlatList
+        data={newsData}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => Linking.openURL(item.url)} style={styles.card}>
+            <View>
+              <Image source={{ uri: item.urlToImage }} style={styles.newsImage} />
               <Text style={styles.newsTitle}>{item.title}</Text>
-              <Text style={styles.newsDescription}>{item.summary}</Text>
-            </TouchableOpacity>
-          )}
-        />
-      )}
+              <Text style={styles.newsDescription}>{item.description}</Text>
+              <View style={styles.newsFooter}>
+                <Text style={styles.newsDate}>{item.publishedAt}</Text>
+                <Text style={styles.newsAuthor}>{item.author}</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        )}
+      />
 
       {/* MODAL FOR REPORTING INCIDENT */}
       <Modal visible={modalVisible} transparent={true} animationType="slide">
