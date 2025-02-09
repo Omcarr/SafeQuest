@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import mapRoutes from "./routes/mapRoutes.js";
+import reportRoutes from "./routes/reportRoutes.js"; // Import the new reports route
 import cors from "cors";
 import os from "os";
 
@@ -13,6 +14,7 @@ app.use(bodyParser.json()); // Parses JSON request bodies
 
 // Routes
 app.use("/api/map", mapRoutes);
+app.use("/api/reports", reportRoutes); // Register the new reports route
 
 // Get Local Network IP for External Access
 const getLocalIP = () => {
