@@ -5,9 +5,12 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  FlatList,
+  Image,
 } from 'react-native';
 import {API_URL} from './constants';
 import {useUser} from '../userContext';
+// import {FlatList} from 'react-native-gesture-handler';
 
 const FamilyPage = ({navigation}) => {
   console.log(navigation);
@@ -90,62 +93,248 @@ const FamilyPage = ({navigation}) => {
   return (
     <View style={styles.container}>
       {isFamily === 0 ? (
+        <View style={styles.container}>
+
+        {/* 🎨 Creative Heading */}
+        <View style={styles.pageHeader}>
+          <Text style={styles.headerText}> Your Family Awaits You!</Text>
+          <Text style={styles.subHeader}>
+            Stay connected, share moments, and ensure your loved ones' safety.
+          </Text>
+        </View>
+      
+        {/* 🏡 Create & Join Family Buttons */}
         <View style={styles.centerContainer}>
           <TouchableOpacity
-            style={styles.button}
+            style={[styles.button, styles.createButton]}
             onPress={() => navigation.navigate('CreateFamily')}>
-            <Text style={styles.buttonText}>Create Family</Text>
+            <Text style={styles.buttonText}>🏠 Create Family</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.button}
+            style={[styles.button, styles.joinButton]}
             onPress={() => navigation.navigate('JoinFamily')}>
-            <Text style={styles.buttonText}>Join Family</Text>
+            <Text style={styles.buttonText}>🔗 Join Family</Text>
           </TouchableOpacity>
         </View>
+      
+        {/* 📌 Why Join a Family? */}
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoHeading}>🔍 Why Join a Family?</Text>
+          <Text style={styles.infoText}>✅ Know your family's real-time location.</Text>
+          <Text style={styles.infoText}>✅ Access emergency contacts instantly.</Text>
+          <Text style={styles.infoText}>✅ Stay updated with important events.</Text>
+          <Text style={styles.infoText}>✅ A safe space for sharing & caring.</Text>
+        </View>
+      
+      </View>
+      
       ) : (
+
+        <View>
+          <View style={styles.pageHeader}>
+          <Text style={styles.headerText}>Family Members</Text>
+        </View>
         <FlatList
-          data={familyMembers}
-          keyExtractor={item => item.id}
-          renderItem={({item}) => (
-            <View style={styles.memberItem}>
-              <Image source={{uri: item.image}} style={styles.memberImage} />
-              <View>
-                <Text style={styles.memberName}>{item.name}</Text>
-                <Text>Age: {item.age}</Text>
-                <Text>Sex: {item.sex}</Text>
-              </View>
+        data={familyMembers}
+        keyExtractor={(item) => item.user_id.toString()} // Ensure unique keys
+        renderItem={({ item, index }) => (
+          <View
+            style={[
+              styles.memberItem,
+              index % 2 === 0 ? styles.alignLeft : styles.alignRight,
+              { backgroundColor: index % 2 === 0 ? "#f0f8ff" : "#ffffe0" }, // Alternating colors
+            ]}
+          >
+            {/* Profile Image */}
+            <Image source={{ uri: item.pfp }} style={styles.memberImage} />
+
+            {/* Details Section */}
+            <View style={styles.detailsContainer}>
+              <Text style={styles.memberName}>{item.name}</Text>
+              <Text style={styles.memberInfo}>📅 DOB: {item.dob}</Text>
+              <Text style={styles.memberInfo}>🧑‍🤝‍🧑 Gender: {item.gender}</Text>
+              {item.location && <Text style={styles.memberInfo}>📍 Location: {item.location}</Text>}
+              <Text style={styles.memberInfo}>📅 Added: {new Date(item.added_at).toDateString()}</Text>
             </View>
-          )}
+          </View>
+        )}
         />
+        </View>
+
+
+
       )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  /** 📌 Main Container **/
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f4f7fc", // Soft light background
+    paddingVertical: 20,
   },
+
+  /** 🎨 Clean & Minimal Header **/
+  pageHeader: {
+    width: "100%",
+    paddingVertical: 10, // Less padding for compact look
+    alignItems: "center",
+    marginBottom: 20,
+  },
+
+  headerText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333", // Darker text for contrast
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+
+  subHeader: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 12,
+    textAlign: "center",
+    width: "85%",
+  },
+
+  /** 🔘 Buttons **/
   centerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '80%',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "90%",
+    alignSelf: "center",
+    marginBottom: 30,
   },
+
   button: {
-    backgroundColor: '#007bff',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    width: '45%',
+    flex: 1,
+    paddingVertical: 15,
+    borderRadius: 25, // More rounded buttons
+    alignItems: "center",
+    marginHorizontal: 10,
   },
+
+  createButton: {
+    backgroundColor: "#28a745", // Soft green
+  },
+
+  joinButton: {
+    backgroundColor: "#007bff", // Soft blue
+  },
+
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
+  },
+
+  /** ℹ️ Info Section **/
+  infoContainer: {
+    backgroundColor: "#fff",
+    width: "90%",
+    alignSelf: "center",
+    padding: 20,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    marginBottom: 20,
+  },
+
+  infoHeading: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+
+  infoText: {
+    fontSize: 14,
+    color: "#555",
+    marginVertical: 3,
+    textAlign: "center",
+  },
+
+  /** 🏡 Family Member Cards **/
+  memberItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "95%",
+    alignSelf: "center",
+    height: 90,
+    borderRadius: 15,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    marginVertical: 12, // More spacing between cards
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+
+  alignLeft: {
+    flexDirection: "row",
+    backgroundColor: "#e7f1ff", // Light Blue
+  },
+
+  alignRight: {
+    flexDirection: "row-reverse",
+    backgroundColor: "#fff9e6", // Light Yellow
+  },
+
+  /** 👤 Profile Image **/
+  imageContainer: {
+    position: "relative",
+    marginHorizontal: 15,
+  },
+
+  memberImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 2,
+    borderColor: "#ddd",
+  },
+
+  /** 🎖️ Badges **/
+  badge: {
+    position: "absolute",
+    bottom: -5,
+    right: -8,
+    backgroundColor: "#ff4d4d",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 15,
+  },
+
+  badgeText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
+
+  /** ℹ️ Details Section **/
+  detailsContainer: {
+    flex: 1,
+    paddingHorizontal: 15,
+  },
+
+  memberName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+
+  memberInfo: {
+    fontSize: 14,
+    color: "#555",
+    marginTop: 2,
   },
 });
+
+
+
+
 
 export default FamilyPage;
