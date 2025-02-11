@@ -10,6 +10,7 @@ import {
 import {useNavigation} from '@react-navigation/native';
 import {useUser} from '../userContext';
 import {API_URL} from './constants';
+import { Alert } from 'react-native';
 
 const ProfileHead = () => {
   const navigation = useNavigation();
@@ -18,6 +19,13 @@ const ProfileHead = () => {
 
   const sosAlert = () => {
     console.log('aaya');
+
+    Alert.alert(
+      "Emergency SOS Sent",
+      "Your SOS alert has been triggered successfully.",
+      [{ text: "OK" }]
+    );
+
     const url = `${API_URL}api/sos_alert?user_id=${encodeURIComponent(
       user.user_id,
     )}`;
@@ -34,18 +42,6 @@ const ProfileHead = () => {
         }
         return response.json();
       })
-      // .then(data => {
-      //   if (!Array.isArray(data)) {
-      //     throw new Error('Unexpected response format: expected an array');
-      //   }
-
-      //   // Update state with the processed family data
-      //   setSavedPlaces(data);
-      //   console.log(data);
-      //   console.log(savedPlaces);
-
-      //   // Redirect to MainApp
-      // })
       .catch(error => console.error('Error:', error));
   };
 
