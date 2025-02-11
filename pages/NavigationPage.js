@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   TextInput,
@@ -9,28 +9,86 @@ import {
   ActivityIndicator,
   Image,
 } from 'react-native';
-import { WebView } from 'react-native-webview';
-import { useUser } from '../userContext';
+import {WebView} from 'react-native-webview';
+import {useUser} from '../userContext';
 import FloatingButton from '../components/FloatingButton';
 
-
-const MAPBOX_API_KEY = 'pk.eyJ1Ijoid2ViLWNvZGVncmFtbWVyIiwiYSI6ImNraHB2dXJvajFldTAzMm14Y2lveTB3a3cifQ.LfZtv0p9GUZCP7ZVuT33ow';
+const MAPBOX_API_KEY =
+  'pk.eyJ1Ijoid2ViLWNvZGVncmFtbWVyIiwiYSI6ImNraHB2dXJvajFldTAzMm14Y2lveTB3a3cifQ.LfZtv0p9GUZCP7ZVuT33ow';
 
 const NavigationPage = () => {
-  const { userData } = useUser();
+  const {userData} = useUser();
   const user = userData;
   const [source, setSource] = useState('');
   const [destination, setDestination] = useState('');
   const [sourceSuggestions, setSourceSuggestions] = useState([]);
   const [destinationSuggestions, setDestinationSuggestions] = useState([]);
-  const [mapsHTML, setMapsHTML] = useState('');
+  const [mapsHTML, setMapsHTML] = useState(`<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Safest Route</title>
+            <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+            <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet" />
+            <style>
+                body { margin: 0; padding: 0; }
+                #map { width: 100%; height: 100vh; }
+            </style>
+        </head>
+        <body>
+            <div id="map"></div>
+            <script>
+    mapboxgl.accessToken = 'pk.eyJ1Ijoid2ViLWNvZGVncmFtbWVyIiwiYSI6ImNraHB2dXJvajFldTAzMm14Y2lveTB3a3cifQ.LfZtv0p9GUZCP7ZVuT33ow';
+    const map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [-87.73318, 41.885887],
+        zoom: 12,
+    });
+
+    map.on('load', () => {
+        // Add the route source
+        map.addSource('route', {
+            type: 'geojson',
+            data: {"coordinates":[[-87.733176,41.885889],[-87.720917,41.885208],[-87.72037,41.873515],[-87.719121,41.873525],[-87.650308,41.875329],[-87.648052,41.875215],[-87.644998,41.850609],[-87.634652,41.845323],[-87.624621,41.72052],[-87.621065,41.713653],[-87.599607,41.713049],[-87.592384,41.707446],[-87.601728,41.676933],[-87.578746,41.646182],[-87.583695,41.589675],[-87.583626,41.583068],[-87.577821,41.511711],[-87.581694,41.506296],[-87.641108,41.506152],[-87.640565,41.502469]],"type":"LineString"}
+        });
+
+        // Add the route layer
+        map.addLayer({
+            id: 'route',
+            type: 'line',
+            source: 'route',
+            layout: { 'line-join': 'round', 'line-cap': 'round' },
+            paint: { 'line-color': '#1DB954', 'line-width': 5 },
+        });
+
+        // Fit the map to the route bounds
+        map.fitBounds([[-87.733176,41.885889],[-87.720917,41.885208],[-87.72037,41.873515],[-87.719121,41.873525],[-87.650308,41.875329],[-87.648052,41.875215],[-87.644998,41.850609],[-87.634652,41.845323],[-87.624621,41.72052],[-87.621065,41.713653],[-87.599607,41.713049],[-87.592384,41.707446],[-87.601728,41.676933],[-87.578746,41.646182],[-87.583695,41.589675],[-87.583626,41.583068],[-87.577821,41.511711],[-87.581694,41.506296],[-87.641108,41.506152],[-87.640565,41.502469]], { padding: 20 });
+
+        // Add markers for the start and end points
+        const startMarker = new mapboxgl.Marker({ color: 'blue' })
+            .setLngLat([-87.73318, 41.885887])
+            .setPopup(new mapboxgl.Popup({ offset: 25 }).setText('Start Point')) // Optional popup
+            .addTo(map);
+
+        const endMarker = new mapboxgl.Marker({ color: 'red' })
+            .setLngLat([-87.640564, 41.50247])
+            .setPopup(new mapboxgl.Popup({ offset: 25 }).setText('End Point')) // Optional popup
+            .addTo(map);
+    });
+</script>
+        </body>
+        </html>`);
   const [loading, setLoading] = useState(false);
   const [satisfaction, setSatisfaction] = useState(null);
   const [activeInput, setActiveInput] = useState(null); // NEW STATE FOR ACTIVE INPUT FIELD
 
   const fetchSuggestions = async (query, setSuggestions) => {
     if (query.length < 3) return;
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_API_KEY}&autocomplete=true&limit=5`;
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+      query,
+    )}.json?access_token=${MAPBOX_API_KEY}&autocomplete=true&limit=5`;
     try {
       const response = await fetch(url);
       const data = await response.json();
@@ -41,7 +99,9 @@ const NavigationPage = () => {
   };
 
   const fetchLatLong = async location => {
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(location)}.json?access_token=${MAPBOX_API_KEY}&limit=1`;
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+      location,
+    )}.json?access_token=${MAPBOX_API_KEY}&limit=1`;
 
     try {
       const response = await fetch(url);
@@ -49,7 +109,7 @@ const NavigationPage = () => {
 
       if (data.features && data.features.length > 0) {
         const coordinates = data.features[0].geometry.coordinates;
-        return { latitude: coordinates[1], longitude: coordinates[0] };
+        return {latitude: coordinates[1], longitude: coordinates[0]};
       } else {
         throw new Error('Location not found');
       }
@@ -62,18 +122,21 @@ const NavigationPage = () => {
   const fetchSafestRoute = async (latA, lonA, latB, lonB) => {
     setLoading(true);
     try {
-      const response = await fetch('http://192.168.115.250:3000/api/map/safest-route', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          latA,
-          lonA,
-          latB,
-          lonB,
-          age: 25,
-          sex: 'M',
-        }),
-      });
+      const response = await fetch(
+        'http://192.168.14.170:3000/api/map/safest-route',
+        {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            latA,
+            lonA,
+            latB,
+            lonB,
+            age: 25,
+            sex: 'M',
+          }),
+        },
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -81,6 +144,7 @@ const NavigationPage = () => {
 
       const data = await response.text();
       setMapsHTML(data);
+      console.log(data);
     } catch (error) {
       console.error('Error fetching route:', error);
     } finally {
@@ -118,13 +182,18 @@ const NavigationPage = () => {
     <View style={styles.container}>
       {/* Source Input Field */}
       <View style={styles.inputContainer}>
-        <Image source={{ uri: 'https://cdn-icons-png.flaticon.com/128/149/149059.png' }} style={styles.icon} />
+        <Image
+          source={{
+            uri: 'https://cdn-icons-png.flaticon.com/128/149/149059.png',
+          }}
+          style={styles.icon}
+        />
         <TextInput
           style={styles.input}
           placeholder="Enter your location"
           placeholderTextColor="#000"
           value={source}
-          onChangeText={(text) => {
+          onChangeText={text => {
             setSource(text);
             setActiveInput('source'); // Set active field
             fetchSuggestions(text, setSourceSuggestions);
@@ -135,13 +204,18 @@ const NavigationPage = () => {
 
       {/* Destination Input Field */}
       <View style={styles.inputContainer}>
-        <Image source={{ uri: 'https://cdn-icons-png.flaticon.com/128/2776/2776067.png' }} style={styles.icon} />
+        <Image
+          source={{
+            uri: 'https://cdn-icons-png.flaticon.com/128/2776/2776067.png',
+          }}
+          style={styles.icon}
+        />
         <TextInput
           style={styles.input}
           placeholder="Enter destination location"
           placeholderTextColor="#000"
           value={destination}
-          onChangeText={(text) => {
+          onChangeText={text => {
             setDestination(text);
             setActiveInput('destination'); // Set active field
             fetchSuggestions(text, setDestinationSuggestions);
@@ -155,14 +229,13 @@ const NavigationPage = () => {
         <FlatList
           data={sourceSuggestions}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <TouchableOpacity
               style={styles.suggestion}
               onPress={() => {
                 setSource(item);
                 setSourceSuggestions([]);
-              }}
-            >
+              }}>
               <Text style={styles.suggestionText}>{item}</Text>
             </TouchableOpacity>
           )}
@@ -173,14 +246,13 @@ const NavigationPage = () => {
         <FlatList
           data={destinationSuggestions}
           keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <TouchableOpacity
               style={styles.suggestion}
               onPress={() => {
                 setDestination(item);
                 setDestinationSuggestions([]);
-              }}
-            >
+              }}>
               <Text style={styles.suggestionText}>{item}</Text>
             </TouchableOpacity>
           )}
@@ -188,38 +260,55 @@ const NavigationPage = () => {
       )}
 
       {/* Find Directions Button */}
-      <TouchableOpacity style={styles.button} onPress={handleFindDirections}>
+      <TouchableOpacity style={styles.button}>
+        {/* <TouchableOpacity style={styles.button} onPress={handleFindDirections}> */}
         <Text style={styles.buttonText}>Find Directions</Text>
       </TouchableOpacity>
 
       {/* Loading Indicator */}
-      {loading && <ActivityIndicator size="large" color="#007bff" style={{ marginTop: 20 }} />}
+      {loading && (
+        <ActivityIndicator
+          size="large"
+          color="#007bff"
+          style={{marginTop: 20}}
+        />
+      )}
 
       {/* Map Display - Full Screen Below Button */}
       {mapsHTML ? (
         <View style={styles.mapContainer}>
-          <WebView originWhitelist={['*']} source={{ html: mapsHTML }} style={styles.webView} />
+          <WebView
+            originWhitelist={['*']}
+            source={{html: mapsHTML}}
+            style={styles.webView}
+          />
 
           {/* Are You Satisfied Section */}
           <View style={styles.satisfactionContainer}>
-          {/* Row with text and buttons */}
-          <View style={styles.satisfactionRow}>
-            <Text style={styles.satisfactionText}>Are you satisfied?</Text>
-            <View style={styles.satisfactionButtons}>
-              <TouchableOpacity style={styles.satisfactionButtonYes} onPress={() => setSatisfaction('positive')}>
-                <Text style={styles.satisfactionButtonText}>Yes</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.satisfactionButtonNo} onPress={() => setSatisfaction('negative')}>
-                <Text style={styles.satisfactionButtonText}>No</Text>
-              </TouchableOpacity>
+            {/* Row with text and buttons */}
+            <View style={styles.satisfactionRow}>
+              <Text style={styles.satisfactionText}>Are you satisfied?</Text>
+              <View style={styles.satisfactionButtons}>
+                <TouchableOpacity
+                  style={styles.satisfactionButtonYes}
+                  onPress={() => setSatisfaction('positive')}>
+                  <Text style={styles.satisfactionButtonText}>Yes</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.satisfactionButtonNo}
+                  onPress={() => setSatisfaction('negative')}>
+                  <Text style={styles.satisfactionButtonText}>No</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
 
-          {/* Positive feedback appears below */}
-          {satisfaction === 'positive' && (
-            <Text style={styles.positiveFeedback}>Great! Glad this helped. 😊</Text>
-          )}
-        </View>
+            {/* Positive feedback appears below */}
+            {satisfaction === 'positive' && (
+              <Text style={styles.positiveFeedback}>
+                Great! Glad this helped. 😊
+              </Text>
+            )}
+          </View>
         </View>
       ) : null}
       <FloatingButton />
@@ -288,8 +377,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   satisfactionContainer: {
-    marginTop: 8, 
-    width: '100%', 
+    marginTop: 8,
+    width: '100%',
     paddingHorizontal: 10,
   },
   satisfactionRow: {
@@ -298,17 +387,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between', // Space out text and buttons
   },
   satisfactionText: {
-    fontSize: 14, 
+    fontSize: 14,
     fontWeight: 'bold',
-    flex: 1, 
+    flex: 1,
   },
   satisfactionButtons: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   satisfactionButtonYes: {
-    marginHorizontal: 5, 
-    paddingVertical: 5,  
+    marginHorizontal: 5,
+    paddingVertical: 5,
     paddingHorizontal: 10,
     backgroundColor: '#abf7b1',
     borderRadius: 4,
@@ -321,16 +410,14 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   satisfactionButtonText: {
-    fontSize: 12, 
+    fontSize: 12,
   },
   positiveFeedback: {
     marginTop: 5, // Add space below Yes/No buttons
     color: 'green',
-    fontSize: 13, 
+    fontSize: 13,
     textAlign: 'center', // Center align for better UI
   },
-
-
 });
 
 export default NavigationPage;

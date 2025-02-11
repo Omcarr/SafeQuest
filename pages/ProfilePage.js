@@ -23,16 +23,50 @@ const ProfilePage = ({navigation}) => {
 
   const {userData} = useUser();
   const user = userData;
-  const [familyMembers, setFamilyMembers] = useState(null);
+  const [familyMembers, setFamilyMembers] = useState([
+    {
+      group_id: 7,
+      user_id: 6,
+      added_at: '2025-02-08T20:27:58.899898',
+      gender: 'Female',
+      dob: '1992-03-10',
+      name: 'Anjali Yeole',
+      pfp: 'https://cdn-icons-png.flaticon.com/128/6997/6997662.png',
+      location: '(41.8781, -87.6298)',
+      age: 32,
+    },
+    {
+      group_id: 7,
+      user_id: 5,
+      added_at: '2025-02-08T20:29:27.845666',
+      gender: 'Female',
+      dob: '1990-05-15',
+      name: 'Shrutika Yeole',
+      pfp: 'https://cdn-icons-png.flaticon.com/128/6997/6997662.png',
+      location: '(41.8781, -87.6298)',
+      age: 34,
+    },
+    {
+      group_id: 7,
+      user_id: 7,
+      added_at: '2025-02-09T07:13:06.937584',
+      gender: 'Male',
+      dob: '1985-11-03',
+      name: 'Shrikant Yeole',
+      pfp: 'https://cdn-icons-png.flaticon.com/128/2202/2202112.png',
+      location: '(41.8781, -87.6298)',
+      age: 39,
+    },
+  ]);
 
-  useEffect(() => {
-    fetchFamily();
-    fetchLocations(); // Call fetchData when the page opens
-  }, []);
+  // useEffect(() => {
+  //   fetchFamily();
+  //   fetchLocations(); // Call fetchData when the page opens
+  // }, []);
 
-  useEffect(() => {
-    console.log(savedPlaces);
-  }, [savedPlaces]);
+  // useEffect(() => {
+  //   console.log(savedPlaces);
+  // }, [savedPlaces]);
 
   // const familyMembers = [
   //   {
@@ -68,7 +102,29 @@ const ProfilePage = ({navigation}) => {
   //   },
   // ]);
 
-  const [savedPlaces, setSavedPlaces] = useState(null);
+  const [savedPlaces, setSavedPlaces] = useState([
+    {
+      user_id: 5,
+      location_name: 'Home',
+      latitude: 41.8781,
+      longitude: -87.6298,
+      location_id: 1,
+    },
+    {
+      user_id: 5,
+      location_name: 'Work',
+      latitude: 41.8789,
+      longitude: -87.6359,
+      location_id: 2,
+    },
+    {
+      user_id: 5,
+      location_name: 'Shopping',
+      latitude: 41.8947,
+      longitude: -87.624,
+      location_id: 3,
+    },
+  ]);
 
   const fetchFamily = () => {
     const url = `${API_URL}api/family-groups/${encodeURIComponent(

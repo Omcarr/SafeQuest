@@ -1,1 +1,1 @@
-export const API_URL = 'https://2f08-103-97-166-170.ngrok-free.app/';
+export const API_URL = 'https://e367-103-212-142-20.ngrok-free.app';

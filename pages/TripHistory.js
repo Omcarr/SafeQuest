@@ -41,7 +41,34 @@ import {format} from 'date-fns';
 //   ];
 
 const TripHistory = () => {
-  const [trips, setTrips] = useState([]);
+  const [trips, setTrips] = useState([
+    {
+      trip_id: 4,
+      user_id: 5,
+      start_location_name: 'Home',
+      start_latitude: 41.8781,
+      start_longitude: -87.6298,
+      destination_name: 'Office',
+      destination_latitude: 41.8789,
+      destination_longitude: -87.6359,
+      trip_date: '2025-02-09',
+      trip_time: '2025-02-09T14:30:00',
+      feedback: 'The route was smooth and well-marked. No issues.',
+    },
+    {
+      trip_id: 5,
+      user_id: 5,
+      start_location_name: 'Office',
+      start_latitude: 41.8789,
+      start_longitude: -87.6359,
+      destination_name: 'Shopping',
+      destination_latitude: 41.8947,
+      destination_longitude: -87.624,
+      trip_date: '2025-02-09',
+      trip_time: '2025-02-09T14:30:00',
+      feedback: null,
+    },
+  ]);
   const {userData} = useUser();
   const user = userData;
 
@@ -96,9 +123,9 @@ const TripHistory = () => {
       .catch(error => console.error('Error:', error));
   };
 
-  useEffect(() => {
-    fetchHistory(); // Call fetchData when the page opens
-  }, []);
+  // useEffect(() => {
+  //   fetchHistory(); // Call fetchData when the page opens
+  // }, []);
 
   const renderItem = ({item}) => {
     const formattedDate = item.trip_date

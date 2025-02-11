@@ -19,7 +19,41 @@ const FamilyPage = ({navigation}) => {
   const user = userData;
 
   const [isFamily, setIsFamily] = useState(0); //condition to check if part of family
-  const [familyMembers, setFamilyMembers] = useState(null); ///variable for members data
+  const [familyMembers, setFamilyMembers] = useState([
+    {
+      group_id: 7,
+      user_id: 6,
+      added_at: '2025-02-08T20:27:58.899898',
+      gender: 'Female',
+      dob: '1992-03-10',
+      name: 'Anjali Yeole',
+      pfp: 'https://cdn-icons-png.flaticon.com/128/6997/6997662.png',
+      location: '(41.8781, -87.6298)',
+      age: 32,
+    },
+    {
+      group_id: 7,
+      user_id: 5,
+      added_at: '2025-02-08T20:29:27.845666',
+      gender: 'Female',
+      dob: '1990-05-15',
+      name: 'Shrutika Yeole',
+      pfp: 'https://cdn-icons-png.flaticon.com/128/6997/6997662.png',
+      location: '(41.8781, -87.6298)',
+      age: 34,
+    },
+    {
+      group_id: 7,
+      user_id: 7,
+      added_at: '2025-02-09T07:13:06.937584',
+      gender: 'Male',
+      dob: '1985-11-03',
+      name: 'Shrikant Yeole',
+      pfp: 'https://cdn-icons-png.flaticon.com/128/2202/2202112.png',
+      location: '(41.8781, -87.6298)',
+      age: 39,
+    },
+  ]); ///variable for members data
 
   const fetchFamily = () => {
     const url = `${API_URL}api/family-groups/${encodeURIComponent(
@@ -89,9 +123,9 @@ const FamilyPage = ({navigation}) => {
       .catch(error => console.error('Error:', error));
   };
 
-  useEffect(() => {
-    fetchFamily(); // Call fetchData when the page opens
-  }, []);
+  // useEffect(() => {
+  //   fetchFamily(); // Call fetchData when the page opens
+  // }, []);
 
   return (
     <View style={styles.container}>
@@ -109,12 +143,14 @@ const FamilyPage = ({navigation}) => {
           <View style={styles.centerContainer}>
             <TouchableOpacity
               style={[styles.button, styles.createButton]}
-              onPress={() => navigation.navigate('CreateFamily')}>
+              onPress={() => setIsFamily(1)}>
+              {/* onPress={() => navigation.navigate('CreateFamily')}> */}
               <Text style={styles.buttonText}>🏠 Create Family</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, styles.joinButton]}
-              onPress={() => navigation.navigate('JoinFamily')}>
+              // onPress={() => navigation.navigate('JoinFamily')}>
+              onPress={() => setIsFamily(1)}>
               <Text style={styles.buttonText}>🔗 Join Family</Text>
             </TouchableOpacity>
           </View>
@@ -136,43 +172,52 @@ const FamilyPage = ({navigation}) => {
             </Text>
           </View>
         </View>
-      ) : (<>
-        <View>
-          <View style={styles.pageHeader}>
-            <Text style={styles.headerText}>Family Members</Text>
-          </View>
-          <FlatList
-            data={familyMembers}
-            keyExtractor={item => item.user_id.toString()} // Ensure unique keys
-            renderItem={({item, index}) => {
-              if (item.user_id === user.user_id) return null;
+      ) : (
+        <>
+          <View>
+            <View style={styles.pageHeader}>
+              <Text style={styles.headerText}>Family Members</Text>
+            </View>
+            <FlatList
+              data={familyMembers}
+              keyExtractor={item => item.user_id.toString()} // Ensure unique keys
+              renderItem={({item, index}) => {
+                if (item.user_id === user.user_id) return null;
 
-              return (
-                <View
-                  style={[
-                    styles.memberItem,
-                    index % 2 === 0 ? styles.alignLeft : styles.alignRight,
-                    {backgroundColor: index % 2 === 0 ? '#f0f8ff' : '#ffffe0'}, // Alternating colors
-                  ]}>
-                  {/* Profile Image */}
-                  <Image source={{uri: item.pfp}} style={styles.memberImage} />
+                return (
+                  <View
+                    style={[
+                      styles.memberItem,
+                      index % 2 === 0 ? styles.alignLeft : styles.alignRight,
+                      {
+                        backgroundColor:
+                          index % 2 === 0 ? '#f0f8ff' : '#ffffe0',
+                      }, // Alternating colors
+                    ]}>
+                    {/* Profile Image */}
+                    <Image
+                      source={{uri: item.pfp}}
+                      style={styles.memberImage}
+                    />
 
-                  {/* Details Section */}
-                  <View style={styles.detailsContainer}>
-                    <Text style={styles.memberName}>{item.name}</Text>
-                    <Text style={styles.memberInfo}>Age: {item.age}</Text>
-                    <Text style={styles.memberInfo}>Gender: {item.gender}</Text>
-                    {/* <Text style={styles.memberInfo}>
+                    {/* Details Section */}
+                    <View style={styles.detailsContainer}>
+                      <Text style={styles.memberName}>{item.name}</Text>
+                      <Text style={styles.memberInfo}>Age: {item.age}</Text>
+                      <Text style={styles.memberInfo}>
+                        Gender: {item.gender}
+                      </Text>
+                      {/* <Text style={styles.memberInfo}>
                       📅 Added: {new Date(item.added_at).toDateString()}
                     </Text> */}
+                    </View>
                   </View>
-                </View>
-              );
-            }}
-          />
-        </View>
-      <FamilyLoc />
-      </>
+                );
+              }}
+            />
+          </View>
+          <FamilyLoc />
+        </>
       )}
     </View>
   );
