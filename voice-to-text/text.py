@@ -1,7 +1,7 @@
 from groq import Groq
 
 # Initialize Groq client with API key
-client = Groq(api_key="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")
+client = Groq(api_key=<YOUR GROQ API KEY>)
 
 # ✅ Define user query separately
 user_query = "hi what is up"
