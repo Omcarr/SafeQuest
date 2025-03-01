@@ -19,7 +19,7 @@
 
 ## 🛠️ Tech Stack  
 - **App**: React Native  
-- **Backend**: Django, FastAPI, Node.js
+- **Backend**: FastAPI, Node.js
 - **Database**: PostgreSQL
 - **Mapping**: Mapbox API  
  
